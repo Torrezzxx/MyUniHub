@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyUniHub — Plataforma Acadêmica</title>
+  <!--
+    ┌─────────────────────────────────────────────────┐
+    │  Apply theme before first paint → no FOLC flash  │
+    └─────────────────────────────────────────────────┘
+  -->
+  <script>
+    (function(){
+      var s=localStorage.getItem('hub_theme');
+      var p=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+      if((s||p)==='dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      /* Brand */
+      --primary:          #2E5A9E;
+      --primary-dark:     #1e3f72;
+      --primary-light:    #4a7cc9;
+      --primary-faint:    #eff6ff;
+      --primary-glow:     rgba(46,90,158,.12);
+      /* Accents */
+      --accent-green:     #22c55e;
+      --accent-green-bg:  #dcfce7;
+      --accent-amber:     #f59e0b;
+      --accent-amber-bg:  #fef3c7;
+      --accent-red:       #ef4444;
+      --accent-red-bg:    #fee2e2;
+      /* Layout */
+      --sidebar-bg:       #0d1520;
+      --sidebar-w:        248px;
+      /* Surfaces */
+      --bg:               #F0F4FA;
+      --bg-2:             #e8edf5;
+      --card:             #ffffff;
+      --modal-bg:         #ffffff;
+      --input-bg:         #f9fafb;
+      --input-bg-focus:   #ffffff;
+      --topbar-bg:        #ffffff;
+      --topbar-shadow:    0 1px 6px rgba(0,0,0,.08);
+      /* Typography */
+      --text:             #111827;
+      --text-muted:       #6b7a99;
+      /* Structure */
+      --border:           #e5e7eb;
+      --divider:          #f1f5f9;
+      --shadow-sm:        0 1px 8px rgba(0,0,0,.07);
+      --shadow-md:        0 4px 20px rgba(0,0,0,.1);
+      --shadow-lg:        0 24px 64px rgba(0,0,0,.18);
+      /* Zebra (schedule grid) */
+      --zebra-odd:        #f9fafb;
+      --zebra-even:       #f1f5f9;
+      /* Chart tokens */
+      --chart-grid:       rgba(0,0,0,.06);
+      --chart-text:       #6b7a99;
+      --chart-tick:       #94a3b8;
+      /* Scrollbar */
+      --scroll-thumb:     #d1d5db;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       DARK THEME — toggled by .dark class on <html>
+    ══════════════════════════════════════════════════════ */
+    html.dark {
+      --primary:          #5b8de0;
+      --primary-dark:     #4a7cc9;
+      --primary-light:    #7aaee8;
+      --primary-faint:    #1a2a4a;
+      --primary-glow:     rgba(91,141,224,.18);
+
+      --accent-green-bg:  #052e16;
+      --accent-amber-bg:  #1c1200;
+      --accent-red-bg:    #2c0707;
+
+      --sidebar-bg:       #070d18;
+
+      --bg:               #0F172A;
+      --bg-2:             #131e30;
+      --card:             #1E293B;
+      --modal-bg:         #1E293B;
+      --input-bg:         #0f172a;
+      --input-bg-focus:   #162032;
+      --topbar-bg:        #1E293B;
+      --topbar-shadow:    0 1px 6px rgba(0,0,0,.3);
+
+      --text:             #F8FAFC;
+      --text-muted:       #94A3B8;
+
+      --border:           #334155;
+      --divider:          #1e2d40;
+      --shadow-sm:        0 1px 8px rgba(0,0,0,.28);
+      --shadow-md:        0 4px 20px rgba(0,0,0,.36);
+      --shadow-lg:        0 24px 64px rgba(0,0,0,.56);
+
+      --zebra-odd:        #1e2d3e;
+      --zebra-even:       #162032;
+
+      --chart-grid:       rgba(255,255,255,.07);
+      --chart-text:       #94a3b8;
+      --chart-tick:       #64748b;
+
+      --scroll-thumb:     #334155;
+    }
+
+    /* Smooth theme transition for surfaces */
+    body, .card, .stat-card, .modal-box, .lock-card, .auth-card,
+    .setup-card, .top-bar, .dl-item, .subj-card, .chk-item,
+    .tl-body, .sg-cell, .sg-time, .cal-day, .filter-pill,
+    .input-field, .btn-ghost, .btn-danger, .btn-success,
+    .auth-tab, .auth-tabs, .user-pod, #toast {
+      transition:
+        background-color .28s ease,
+        border-color     .28s ease,
+        color            .18s ease,
+        box-shadow       .28s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+    h1,h2,h3,h4 { font-family: 'Outfit', sans-serif; }
+
+    /* ── UTIL ─────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: flex; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeUp .3s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes modalPop { from { opacity:0; transform:scale(.93) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes pulseGlow { 0%,100%{opacity:1;} 50%{opacity:.6;} }
+    @keyframes slideIn { from{transform:translateX(-16px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+
+    /* ── FORMS ────────────────────────────── */
+    .input-field {
+      width:100%; padding:11px 14px; border:2px solid var(--border);
+      border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px;
+      color:var(--text); background:var(--input-bg); outline:none;
+      caret-color:var(--primary);
+      -webkit-appearance:none; appearance:none;
+    }
+    .input-field::placeholder { color:var(--text-muted); opacity:.7; }
+    .input-field:focus { border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-glow); background:var(--input-bg-focus); }
+    html.dark select.input-field {
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
+    }
+    .form-label { display:block; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+    .form-group { margin-bottom:16px; }
+    textarea.input-field { resize:vertical; min-height:60px; }
+    .form-error { color:var(--accent-red); font-size:12px; font-weight:600; margin-top:5px; display:none; }
+    .form-error.show { display:block; }
+
+    /* ── BUTTONS ──────────────────────────── */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:11px 20px; border-radius:10px; border:none; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .17s; white-space:nowrap; }
+    .btn-primary { background:linear-gradient(135deg,var(--primary),var(--primary-light)); color:#fff; box-shadow:0 4px 14px rgba(46,90,158,.3); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 22px rgba(46,90,158,.4); }
+    .btn-full { width:100%; }
+    .btn-outline { background:transparent; color:var(--primary); border:2px solid var(--primary); }
+    .btn-outline:hover { background:var(--primary-faint); }
+    .btn-ghost { background:var(--divider); color:var(--text-muted); }
+    .btn-ghost:hover { background:var(--border); }
+    .btn-danger { background:var(--accent-red-bg); color:var(--accent-red); }
+    .btn-danger:hover { filter:brightness(1.1); }
+    .btn-sm { padding:7px 14px; font-size:13px; border-radius:8px; }
+    .btn-xs { padding:4px 9px; font-size:12px; border-radius:6px; }
+    .btn-success { background:var(--accent-green-bg); color:#15803d; }
+    html.dark .btn-success { color:#86efac; }
+    .btn-success:hover { filter:brightness(1.1); }
+
+    /* ── CARDS ────────────────────────────── */
+    .card { background:var(--card); border-radius:16px; padding:22px; box-shadow:var(--shadow-sm); border:1px solid transparent; }
+    html.dark .card { border-color:var(--border); }
+    .card-sm { padding:16px; }
+    .stat-card { background:var(--card); border-radius:16px; padding:20px; box-shadow:var(--shadow-sm); border-left:4px solid var(--primary); border-top:1px solid transparent; border-right:1px solid transparent; border-bottom:1px solid transparent; }
+    html.dark .stat-card { border-top-color:var(--border); border-right-color:var(--border); border-bottom-color:var(--border); }
+
+    /* ── CHIPS ────────────────────────────── */
+    .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; }
+    .chip-blue   { background:#dbeafe; color:#1d4ed8; }
+    .chip-green  { background:#dcfce7; color:#15803d; }
+    .chip-red    { background:#fee2e2; color:#dc2626; }
+    .chip-amber  { background:#fef3c7; color:#b45309; }
+    .chip-slate  { background:#f1f5f9; color:#475569; }
+    .badge { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 5px; border-radius:99px; font-size:10px; font-weight:800; background:var(--accent-red); color:#fff; }
+
+    /* ── PASSWORD STRENGTH ────────────────── */
+    .pwd-meter { height:5px; border-radius:3px; background:var(--border); margin-top:7px; overflow:hidden; }
+    .pwd-fill { height:100%; border-radius:3px; transition:width .3s,background .3s; }
+    .pwd-label { font-size:11px; margin-top:4px; font-weight:600; }
+
+    /* ══ LOGIN SCREEN ═════════════════════════════════════════ */
+    #loginScreen {
+      min-height:100vh;
+      background:linear-gradient(140deg, #080f1e 0%, #132244 45%, var(--primary) 100%);
+      align-items:center; justify-content:center; flex-direction:column; position:relative; overflow:hidden;
+    }
+    #loginScreen::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(ellipse 60% 50% at 15% 90%, rgba(74,124,201,.15) 0%, transparent 70%),
+                  radial-gradient(ellipse 45% 40% at 85% 8%, rgba(255,255,255,.05) 0%, transparent 60%);
+    }
+    #loginScreen::after {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    .auth-card {
+      background:rgba(255,255,255,.98); border-radius:24px; padding:44px 42px;
+      width:430px; max-width:95vw; box-shadow:0 32px 80px rgba(0,0,0,.3);
+      position:relative; z-index:1;
+    }
+    html.dark .auth-card { background:#1a2744; border:1px solid var(--border); }
+    .logo-mark {
+      width:48px; height:48px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius:13px; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 8px 24px rgba(46,90,158,.38); margin-bottom:20px;
+    }
+    /* Auth tab toggle */
+    .auth-tabs { display:flex; background:var(--divider); border-radius:10px; padding:4px; margin-bottom:26px; }
+    .auth-tab { flex:1; padding:9px; border-radius:7px; border:none; font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-muted); background:none; transition:all .2s; }
+    .auth-tab.active { background:var(--card); color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.12); }
+
+    /* ══ LOCK SCREEN ══════════════════════════════════════════ */
+    #lockScreen {
+      position:fixed; inset:0; z-index:10000;
+      background:rgba(8,15,30,.85); backdrop-filter:blur(10px);
+      display:none; align-items:center; justify-content:center;
+    }
+    #lockScreen.visible { display:flex; }
+    .lock-card {
+      background:var(--modal-bg); border-radius:22px; padding:40px;
+      width:380px; max-width:95vw; text-align:center;
+      box-shadow:var(--shadow-lg); border:1px solid var(--border);
+      animation:modalPop .3s ease;
+    }
+
+    /* ══ SETUP SCREEN ═════════════════════════════════════════ */
+    #setupScreen { min-height:100vh; background:var(--bg); align-items:center; justify-content:center; flex-direction:column; padding:24px; }
+    .setup-card { background:var(--card); border-radius:24px; padding:46px; width:580px; max-width:100%; box-shadow:var(--shadow-md); border:1px solid var(--border); }
+    .step-bar { height:5px; flex:1; border-radius:3px; background:#e5e7eb; transition:background .4s; }
+    .step-bar.done { background:var(--accent-green); }
+    .step-bar.active { background:var(--primary); }
+
+    /* ══ APP LAYOUT ═══════════════════════════════════════════ */
+    #appScreen { min-height:100vh; flex-direction:row; }
+    .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; left:0; top:0; bottom:0; z-index:200; }
+    .sidebar-head { padding:24px 18px 16px; border-bottom:1px solid rgba(255,255,255,.07); }
+    .sidebar-nav { flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; }
+    .nav-section-label { font-size:9.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,.27); padding:12px 14px 4px; margin-top:4px; }
+    .nav-item { display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:10px; color:rgba(255,255,255,.52); cursor:pointer; transition:all .17s; font-size:13.5px; font-weight:500; border:none; background:none; text-align:left; width:100%; position:relative; }
+    .nav-item:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.88); }
+    .nav-item.active { background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff; box-shadow:0 4px 16px rgba(46,90,158,.42); }
+    .nav-icon { font-size:17px; width:20px; text-align:center; flex-shrink:0; }
+    .sl-label { overflow:hidden; }
+    .sidebar-foot { padding:12px 10px; border-top:1px solid rgba(255,255,255,.07); }
+    .user-pod { background:rgba(255,255,255,.06); border-radius:10px; padding:11px; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+    .user-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary-light), #6d28d9); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+
+    .main-content { margin-left:var(--sidebar-w); flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .top-bar { background:var(--topbar-bg); padding:16px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow:var(--topbar-shadow); position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border); }
+    .content-area { padding:26px 30px; flex:1; }
+    .section-title { font-size:22px; font-weight:800; color:var(--text); margin-bottom:2px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:22px; }
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; flex-wrap:wrap; gap:12px; }
+
+    /* ── TIMER ────────────────────────────── */
+    .timer-ring-wrap { position:relative; width:186px; height:186px; margin:0 auto; }
+    .timer-ring-wrap svg { transform:rotate(-90deg); }
+    .timer-ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .timer-digits { font-family:'Outfit',sans-serif; font-size:31px; font-weight:800; color:var(--primary); letter-spacing:-1px; line-height:1; }
+    .timer-lbl { font-size:11px; color:var(--text-muted); margin-top:5px; font-weight:500; }
+    .tcb { width:52px; height:52px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; transition:all .2s; box-shadow:0 4px 12px rgba(0,0,0,.13); }
+    .tcb-main { width:64px; height:64px; font-size:22px; background:linear-gradient(135deg,var(--primary),var(--primary-light)); color:#fff; }
+    .tcb-main:hover { transform:scale(1.08); }
+    .tcb-ghost { background:#f1f5f9; color:#64748b; }
+    .tcb-ghost:hover { background:#e2e8f0; }
+
+    /* ── PROGRESS BAR ─────────────────────── */
+    .prog-track { height:9px; background:var(--border); border-radius:99px; overflow:hidden; }
+    .prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary),var(--primary-light)); transition:width .5s ease; }
+    .prog-fill.overtime { background:linear-gradient(90deg,var(--accent-amber),var(--accent-red)); }
+    .overtime-pill { background:linear-gradient(135deg,var(--accent-amber),var(--accent-red)); color:#fff; padding:3px 11px; border-radius:99px; font-size:11px; font-weight:800; animation:pulseGlow 2s infinite; }
+
+    /* ── CHECKLIST ────────────────────────── */
+    .chk-item { display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; background:var(--divider); margin-bottom:6px; animation:slideIn .25s ease; border:1px solid transparent; }
+    html.dark .chk-item { border-color:var(--border); }
+    .chk-item.done-item { background:var(--accent-green-bg); }
+    html.dark .chk-item.done-item { background:#052e16; border-color:#14532d; }
+    .chk-box { width:20px; height:20px; border-radius:6px; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; border:2px solid var(--border); background:var(--card); }
+    .chk-box.checked { background:var(--accent-green); border-color:var(--accent-green); color:#fff; }
+    .chk-text { flex:1; font-size:13.5px; color:var(--text); }
+    .chk-text.struck { text-decoration:line-through; opacity:.45; color:var(--text-muted); }
+    .chk-del { background:none; border:none; cursor:pointer; font-size:15px; opacity:.3; transition:opacity .15s; padding:2px 4px; }
+    .chk-del:hover { opacity:.7; }
+
+    /* ── SCHEDULE / TIMELINE ──────────────── */
+    .tl-item { display:flex; gap:14px; align-items:stretch; margin-bottom:8px; }
+    .tl-time { width:64px; text-align:right; font-size:11px; color:var(--text-muted); font-weight:500; padding-top:14px; flex-shrink:0; }
+    .tl-spine { display:flex; flex-direction:column; align-items:center; width:18px; flex-shrink:0; }
+    .tl-dot { width:11px; height:11px; border-radius:50%; margin-top:14px; flex-shrink:0; }
+    .tl-line { flex:1; width:2px; background:var(--border); margin:4px 0; }
+    .tl-body { flex:1; background:var(--card); border-radius:11px; padding:11px 15px; box-shadow:var(--shadow-sm); margin-bottom:4px; border-left:3px solid; border-top:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+    /* ── GRID / CARDS ─────────────────────── */
+    .schedule-grid { display:grid; grid-template-columns:68px repeat(7,1fr); gap:3px; }
+    .sg-header { background:var(--primary); color:#fff; padding:8px 5px; text-align:center; font-family:'Outfit',sans-serif; font-weight:700; font-size:12px; border-radius:7px; }
+    .sg-header.today-col { background:var(--primary-dark); }
+    .sg-header.plain { background:var(--divider); color:var(--text-muted); font-size:11px; font-weight:500; }
+    .sg-row-odd  .sg-cell { background:var(--zebra-odd); border-radius:6px; min-height:50px; padding:3px; }
+    .sg-row-even .sg-cell { background:var(--zebra-even); border-radius:6px; min-height:50px; padding:3px; }
+    .sg-cell { border-radius:6px; min-height:50px; padding:3px; }
+    .sg-time { padding:6px; font-size:11px; color:var(--text-muted); font-weight:500; text-align:right; }
+    .sg-pill { border-radius:6px; padding:5px 7px; color:#fff; font-size:11px; font-weight:600; margin-bottom:2px; }
+    .subj-card { background:var(--card); border-radius:14px; padding:17px; box-shadow:var(--shadow-sm); border-top:4px solid; border-left:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .subj-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+
+    /* ── DEADLINES ────────────────────────── */
+    .dl-item { background:var(--card); border-radius:12px; padding:13px 16px; display:flex; align-items:center; gap:13px; box-shadow:var(--shadow-sm); margin-bottom:9px; border-left:4px solid; border-top:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .dl-item:hover { transform:translateX(2px); }
+    .dl-item.completed-dl { opacity:.55; }
+    .dl-alta  { border-color:var(--accent-red); }
+    .dl-media { border-color:var(--accent-amber); }
+    .dl-baixa { border-color:var(--accent-green); }
+
+    /* ── CALENDAR ─────────────────────────── */
+    .cal-grid-7 { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-day { min-height:62px; border-radius:9px; padding:7px 4px; display:flex; flex-direction:column; align-items:center; background:var(--divider); font-size:13px; color:var(--text); border:1px solid var(--border); }
+    .cal-day.today-day { background:var(--primary); color:#fff; font-weight:800; }
+    .cal-day.has-ev:not(.today-day) { background:var(--primary-faint); border-color:var(--primary); }
+    .cal-day.dim { opacity:.32; }
+    .cal-dot-row { display:flex; gap:3px; flex-wrap:wrap; justify-content:center; margin-top:5px; }
+    .cal-dot { width:6px; height:6px; border-radius:50%; }
+
+    /* ── CHARTS / PROGRESSO ───────────────── */
+    .chart-container { position:relative; width:100%; }
+    .sem-bar-track { height:22px; background:var(--border); border-radius:11px; overflow:hidden; }
+    .sem-bar-fill { height:100%; border-radius:11px; background:linear-gradient(90deg, var(--primary), var(--primary-light)); transition:width .8s ease; display:flex; align-items:center; padding-left:10px; font-size:11px; font-weight:800; color:#fff; white-space:nowrap; }
+    .insight-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:22px; }
+
+    /* ── MODAL ────────────────────────────── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.48); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:900; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--modal-bg); border-radius:20px; padding:28px; width:520px; max-width:96vw; max-height:92vh; overflow-y:auto; box-shadow:var(--shadow-lg); border:1px solid var(--border); animation:modalPop .24s ease; }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .modal-close { background:var(--divider); border:none; border-radius:8px; width:30px; height:30px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); }
+    .color-swatch { width:23px; height:23px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform .15s,border-color .15s; }
+    .color-swatch.selected { border-color:var(--text); transform:scale(1.22); }
+    .filter-pill { padding:6px 15px; border-radius:99px; border:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; background:var(--card); color:var(--text-muted); }
+    .filter-pill.active { background:var(--primary); color:#fff; }
+
+    /* ── TOAST ────────────────────────────── */
+    #toast { position:fixed; bottom:22px; right:22px; background:#111827; color:#f8fafc; padding:12px 18px; border-radius:12px; font-size:14px; font-weight:500; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,.3); display:none; max-width:310px; border:1px solid rgba(255,255,255,.08); }
+    html.dark #toast { background:#0f172a; border-color:var(--border); }
+    .empty { text-align:center; padding:44px 24px; color:var(--text-muted); }
+    .empty-icon { font-size:44px; margin-bottom:12px; }
+    .empty strong { display:block; font-size:15px; font-weight:700; margin-bottom:6px; color:var(--text); }
+
+    /* ── SECURITY BADGE ───────────────────── */
+    .sec-badge { display:inline-flex; align-items:center; gap:5px; background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:99px; font-size:10px; font-weight:700; }
+
+    /* ── RESPONSIVE ───────────────────────── */
+    @media(max-width:768px) {
+      :root { --sidebar-w:64px; }
+      .sidebar .sl-label, .sidebar .nav-section-label, .sidebar .user-info { display:none; }
+      .content-area { padding:14px; }
+      .top-bar { padding:12px 14px; }
+      .top-right-info { display:none !important; }
+      .grid-2col { grid-template-columns:1fr !important; }
+      .grid-charts { grid-template-columns:1fr !important; }
+    }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--scroll-thumb); border-radius:3px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  LOCK SCREEN                                     -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div style="font-size:52px;margin-bottom:16px;">🔒</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:6px;">Sessão Bloqueada</h2>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:22px;line-height:1.6;">
+      Inatividade detectada por segurança.<br>Digite sua senha para continuar.
+    </p>
+    <div class="form-group">
+      <input id="lockPwd" class="input-field" type="password" placeholder="Sua senha…" autocomplete="current-password">
+      <p id="lockErr" class="form-error"></p>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="UI.doUnlock()" style="margin-bottom:8px;">🔓 Desbloquear</button>
+    <button class="btn btn-ghost btn-full" onclick="UI.doLogout()">Sair da conta</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  LOGIN / REGISTER SCREEN                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="loginScreen" class="screen active">
+
+  <!-- Theme toggle on login screen -->
+  <button onclick="Theme.toggle()" title="Alternar tema"
+    style="position:absolute;top:20px;right:20px;z-index:10;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:6px 14px 6px 10px;color:rgba(255,255,255,.85);font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(6px);">
+    <span id="loginThemeIco">☀️</span><span id="loginThemeTxt">Claro</span>
+  </button>
+  <div class="auth-card">
+    <div class="logo-mark">
+      <svg width="24" height="24" viewBox="0 0 30 30" fill="none">
+        <path d="M15 2L28 9.5V22.5L15 30L2 22.5V9.5L15 2Z" fill="white" opacity=".9"/>
+        <path d="M15 8L22 12V20L15 24L8 20V12L15 8Z" fill="white" opacity=".45"/>
+      </svg>
+    </div>
+    <h1 style="font-size:28px;font-weight:800;letter-spacing:-.4px;color:#111827;margin-bottom:3px;">MyUniHub</h1>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:22px;">Sua plataforma acadêmica segura e personalizada</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="atbLogin"    onclick="UI.authTab('login')">Entrar</button>
+      <button class="auth-tab"        id="atbRegister" onclick="UI.authTab('register')">Criar Conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input id="lEmail" class="input-field" type="email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input id="lPass" class="input-field" type="password" placeholder="••••••••" autocomplete="current-password">
+        <p id="loginErr" class="form-error"></p>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="UI.doLogin()" style="margin-bottom:12px;">Entrar →</button>
+      <button class="btn btn-ghost btn-full" onclick="UI.demoLogin()" style="font-size:13px;">
+        ✨ Entrar como Demo (sem cadastro)
+      </button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Nome Completo</label>
+        <input id="rName" class="input-field" type="text" placeholder="Seu nome completo" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input id="rEmail" class="input-field" type="email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input id="rPass" class="input-field" type="password" placeholder="Mín. 8 chars, maiúscula, número, símbolo" autocomplete="new-password" oninput="UI.updatePwdStrength()">
+        <div class="pwd-meter"><div id="pwdFill" class="pwd-fill" style="width:0%;background:#e5e7eb;"></div></div>
+        <div id="pwdLabel" class="pwd-label" style="color:var(--text-muted);">Força da senha</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Senha</label>
+        <input id="rPass2" class="input-field" type="password" placeholder="Repita a senha" autocomplete="new-password">
+        <p id="registerErr" class="form-error"></p>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="UI.doRegister()">Criar Conta →</button>
+    </div>
+
+    <div style="margin-top:18px;text-align:center;">
+      <div class="sec-badge">🔒 Dados criptografados com AES-256</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SETUP SCREEN                                    -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="setupScreen" class="screen">
+  <div class="setup-card">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="logo-mark" style="margin:0 auto 16px;">
+        <svg width="24" height="24" viewBox="0 0 30 30" fill="none">
+          <path d="M15 2L28 9.5V22.5L15 30L2 22.5V9.5L15 2Z" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <h2 style="font-size:22px;font-weight:800;margin-bottom:3px;">Configure seu perfil</h2>
+      <p style="font-size:13px;color:var(--text-muted);">Personalize o MyUniHub para sua jornada</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:30px;">
+      <div class="step-bar active" id="sb1"></div>
+      <div class="step-bar" id="sb2"></div>
+      <div class="step-bar" id="sb3"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="stp1">
+      <div class="form-group">
+        <label class="form-label">Curso</label>
+        <input id="sCourse" class="input-field" type="text" placeholder="Ex: Engenharia de Software, Medicina…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instituição</label>
+        <input id="sInst" class="input-field" type="text" placeholder="Ex: USP, UNICAMP, PUC…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Semestre Atual</label>
+        <select id="sSem" class="input-field">
+          <option value="1">1º Semestre</option><option value="2">2º Semestre</option>
+          <option value="3">3º Semestre</option><option value="4">4º Semestre</option>
+          <option value="5">5º Semestre</option><option value="6">6º Semestre</option>
+          <option value="7">7º Semestre</option><option value="8">8º Semestre</option>
+          <option value="9">9º Semestre</option><option value="10">10º Semestre</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="UI.setupGo(2)">Continuar →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="stp2" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="form-group">
+        <div><label class="form-label">Horas / dia</label>
+          <select id="sGoalH" class="input-field">
+            <option>0</option><option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5</option><option>6</option><option selected>8</option>
+            <option>10</option><option>12</option>
+          </select>
+        </div>
+        <div><label class="form-label">Minutos extras</label>
+          <select id="sGoalM" class="input-field">
+            <option selected>0</option><option>15</option><option>30</option><option>45</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="form-group">
+        <div><label class="form-label">Início do Semestre</label>
+          <input id="sSemStart" class="input-field" type="date">
+        </div>
+        <div><label class="form-label">Fim do Semestre</label>
+          <input id="sSemEnd" class="input-field" type="date">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="UI.setupGo(1)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:2;" onclick="UI.setupGo(3)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="stp3" style="display:none;text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">🎓</div>
+      <h3 style="font-size:21px;font-weight:800;margin-bottom:8px;">Tudo configurado!</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:30px;line-height:1.7;">
+        Adicione disciplinas, prazos e acompanhe<br>seu progresso acadêmico com segurança.
+      </p>
+      <button class="btn btn-primary btn-full" onclick="UI.finishSetup()">Acessar MyUniHub 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  MAIN APP                                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="appScreen" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="logo-mark" style="width:34px;height:34px;border-radius:9px;flex-shrink:0;">
+          <svg width="17" height="17" viewBox="0 0 30 30" fill="none">
+            <path d="M15 2L28 9.5V22.5L15 30L2 22.5V9.5L15 2Z" fill="white" opacity=".9"/>
+          </svg>
+        </div>
+        <div class="sl-label">
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:15px;color:#fff;">MyUniHub</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35);">v2.0 — Seguro</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <button class="nav-item active" id="nav-hoje"      onclick="UI.switchTab('hoje')"><span class="nav-icon">📅</span><span class="sl-label">Hoje</span></button>
+      <button class="nav-item"        id="nav-planos"    onclick="UI.switchTab('planos')"><span class="nav-icon">📚</span><span class="sl-label">Planos de Estudo</span></button>
+      <button class="nav-item"        id="nav-prazos"    onclick="UI.switchTab('prazos')">
+        <span class="nav-icon">⏰</span><span class="sl-label">Prazos</span>
+        <span id="prazBadge" class="badge" style="display:none;margin-left:auto;">0</span>
+      </button>
+      <button class="nav-item"        id="nav-calendario" onclick="UI.switchTab('calendario')"><span class="nav-icon">🗓️</span><span class="sl-label">Calendário</span></button>
+      <button class="nav-item"        id="nav-progresso"  onclick="UI.switchTab('progresso')"><span class="nav-icon">📈</span><span class="sl-label">Progresso</span></button>
+      <div class="nav-section-label" style="margin-top:8px;">Conta</div>
+      <button class="nav-item"        id="nav-perfil"    onclick="UI.switchTab('perfil')"><span class="nav-icon">⚙️</span><span class="sl-label">Perfil & Metas</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pod">
+        <div class="user-avatar">👤</div>
+        <div class="user-info sl-label" style="min-width:0;">
+          <div id="sbName" style="font-size:13px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <div id="sbCourse" style="font-size:10px;color:rgba(255,255,255,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+        </div>
+      </div>
+      <button class="nav-item" onclick="UI.doLogout()"><span class="nav-icon">🚪</span><span class="sl-label">Sair</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div>
+        <div id="topGreeting" style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;"></div>
+        <div id="topDate" style="font-size:12px;color:var(--text-muted);"></div>
+      </div>
+      <div class="top-right-info" style="display:flex;align-items:center;gap:18px;">
+        <div style="text-align:right;">
+          <div id="topInst" style="font-size:13px;font-weight:700;color:var(--primary);"></div>
+          <div id="topSem" style="font-size:11px;color:var(--text-muted);"></div>
+        </div>
+        <div style="background:var(--primary-faint);border:2px solid #dbeafe;border-radius:11px;padding:8px 14px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Meta Diária</div>
+          <div id="topGoal" style="font-size:15px;font-weight:800;color:var(--primary);font-family:'Outfit',sans-serif;"></div>
+        </div>
+        <!-- ★ THEME TOGGLE -->
+        <div style="display:flex;align-items:center;gap:8px;margin-left:4px;">
+          <button onclick="Theme.toggle()" title="Alternar modo escuro/claro" aria-label="Alternar tema"
+            style="position:relative;width:52px;height:28px;border-radius:99px;background:var(--divider);border:2px solid var(--border);cursor:pointer;flex-shrink:0;overflow:hidden;">
+            <div id="themeKnob" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:11px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);">
+              <span id="themeIco">☀️</span>
+            </div>
+          </button>
+        </div>
+        <div class="sec-badge">🔒 AES</div>
+      </div>
+    </div>
+
+    <!-- TABS CONTENT -->
+    <div class="content-area">
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: HOJE                     -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-hoje" class="tab-content active">
+        <div class="section-title">Hoje</div>
+        <div id="todaySubtitle" class="section-sub"></div>
+
+        <!-- TIMER + STATS -->
+        <div style="display:grid;grid-template-columns:210px 1fr;gap:18px;margin-bottom:20px;" class="grid-2col">
+          <div class="card" style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;">Cronômetro</div>
+            <div class="timer-ring-wrap">
+              <svg width="186" height="186" viewBox="0 0 186 186">
+                <circle cx="93" cy="93" r="82" fill="none" stroke="#f0f4fa" stroke-width="12"/>
+                <circle id="timerRing" cx="93" cy="93" r="82" fill="none" stroke="var(--primary)" stroke-width="12"
+                  stroke-dasharray="515.22" stroke-dashoffset="515.22" stroke-linecap="round"/>
+              </svg>
+              <div class="timer-ring-inner">
+                <div id="timerDigits" class="timer-digits">00:00:00</div>
+                <div id="timerLbl" class="timer-lbl">Pronto</div>
+                <div id="otPill" class="overtime-pill" style="display:none;margin-top:5px;">⚡ Hora Extra!</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <button class="tcb tcb-ghost" onclick="App.resetTimer()" title="Resetar">↺</button>
+              <button class="tcb tcb-main" id="timerBtn" onclick="App.toggleTimer()">▶</button>
+              <button class="tcb tcb-ghost" onclick="App.timerInfo()" style="font-size:15px;">📋</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="grid-2col">
+              <div class="stat-card">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">⏱ Estudado</div>
+                <div id="studiedToday" style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--primary);">0h 0min</div>
+              </div>
+              <div class="stat-card" style="border-color:var(--accent-green);">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">🎯 Restam</div>
+                <div id="timeRemain" style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--accent-green);">—</div>
+              </div>
+            </div>
+            <div class="card card-sm" style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+                <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Progresso da Meta</div>
+                <div id="progPct" style="font-size:13px;font-weight:800;color:var(--primary);">0%</div>
+              </div>
+              <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+              <div id="otSec" style="margin-top:10px;display:none;">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">⚡ Hora Extra</div>
+                <div id="otVal" style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--accent-amber);">0min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CHECKLIST ────────────────── -->
+        <div class="card" style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div>
+              <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;">✅ Checklist do Dia</div>
+              <div style="font-size:12px;color:var(--text-muted);">Suas metas para hoje</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="App.openTaskInput()">+ Tarefa</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span style="font-size:12px;color:var(--text-muted);">Progresso</span>
+            <span id="chkRatio" style="font-size:12px;font-weight:700;color:var(--primary);">0/0</span>
+          </div>
+          <div class="prog-track" style="margin-bottom:13px;">
+            <div id="chkFill" class="prog-fill" style="width:0%;"></div>
+          </div>
+          <div id="chkList"></div>
+          <div id="quickAdd" style="display:none;margin-top:10px;gap:8px;align-items:center;">
+            <input id="taskInp" class="input-field" type="text" placeholder="Descreva a tarefa…" style="flex:1;">
+            <button class="btn btn-primary btn-sm" onclick="App.submitTask()">✓</button>
+            <button class="btn btn-ghost btn-sm" onclick="App.cancelTask()">✕</button>
+          </div>
+        </div>
+
+        <!-- ── AULAS DE HOJE ─────────────── -->
+        <div class="card">
+          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px;">Aulas de Hoje</div>
+          <div id="todayDayName" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;"></div>
+          <div id="todaySchedule"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: PLANOS                   -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-planos" class="tab-content">
+        <div class="page-header">
+          <div><div class="section-title">Grade Horária</div><div class="section-sub">Organize sua semana acadêmica</div></div>
+          <button class="btn btn-primary btn-sm" onclick="UI.openSubModal()">+ Disciplina</button>
+        </div>
+        <div id="subjLegend" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+        <div class="card" style="overflow-x:auto;margin-bottom:20px;padding:14px;">
+          <div id="weekGrid" style="min-width:560px;"></div>
+        </div>
+        <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;">Disciplinas</div>
+        <div id="subjCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:13px;"></div>
+      </div>
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: PRAZOS                   -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-prazos" class="tab-content">
+        <div class="page-header">
+          <div><div class="section-title">Prazos & Entregas</div><div class="section-sub">Contagem regressiva para cada compromisso</div></div>
+          <button class="btn btn-primary btn-sm" onclick="UI.openDlModal()">+ Novo Prazo</button>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;">
+          <button class="filter-pill active" id="fp-all"       onclick="App.filterDL('all')">Todos</button>
+          <button class="filter-pill"        id="fp-Prova"     onclick="App.filterDL('Prova')">📝 Provas</button>
+          <button class="filter-pill"        id="fp-Trabalho"  onclick="App.filterDL('Trabalho')">📄 Trabalhos</button>
+          <button class="filter-pill"        id="fp-Seminário" onclick="App.filterDL('Seminário')">🎤 Seminários</button>
+          <button class="filter-pill"        id="fp-Inscrição" onclick="App.filterDL('Inscrição')">📋 Inscrições</button>
+          <button class="filter-pill"        id="fp-Outro"     onclick="App.filterDL('Outro')">📌 Outros</button>
+        </div>
+        <div id="dlList"></div>
+      </div>
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: CALENDÁRIO               -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-calendario" class="tab-content">
+        <div class="section-title">Calendário Acadêmico</div>
+        <div class="section-sub">Prazos e compromissos visualizados no tempo</div>
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <button onclick="App.prevMon()" class="btn btn-ghost btn-sm" style="font-size:20px;padding:5px 11px;">‹</button>
+            <div id="calTitle" style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;"></div>
+            <button onclick="App.nextMon()" class="btn btn-ghost btn-sm" style="font-size:20px;padding:5px 11px;">›</button>
+          </div>
+          <div class="cal-grid-7" style="margin-bottom:5px;">
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Dom</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Seg</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Ter</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Qua</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Qui</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Sex</div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);padding:5px;">Sáb</div>
+          </div>
+          <div class="cal-grid-7" id="calGrid"></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid #f1f5f9;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);">
+              <div style="width:8px;height:8px;background:var(--accent-red);border-radius:50%;"></div>Alta
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);">
+              <div style="width:8px;height:8px;background:var(--accent-amber);border-radius:50%;"></div>Média
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);">
+              <div style="width:8px;height:8px;background:var(--accent-green);border-radius:50%;"></div>Baixa/Feito
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;">Próximos Eventos</div>
+        <div id="upcomingEvts"></div>
+      </div>
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: PROGRESSO                -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-progresso" class="tab-content">
+        <div class="section-title">Dashboard de Progresso</div>
+        <div class="section-sub">Análise detalhada da sua jornada acadêmica</div>
+
+        <!-- Semester bar -->
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+            <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;">📆 Progresso do Semestre</div>
+            <div id="semPctLabel" style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--primary);"></div>
+          </div>
+          <div id="semBarArea">
+            <div class="sem-bar-track"><div id="semFill" class="sem-bar-fill" style="width:0%;"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--text-muted);">
+              <span id="semStart"></span>
+              <span id="semDaysLeft"></span>
+              <span id="semEnd"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insight cards -->
+        <div class="insight-grid" id="insightCards"></div>
+
+        <!-- Charts grid -->
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start;" class="grid-charts">
+          <div class="card">
+            <div style="font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;">📊 Horas Estudadas — Últimos 7 Dias</div>
+            <div class="chart-container" style="height:240px;">
+              <canvas id="studyLineChart"></canvas>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card">
+              <div style="font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;">🍩 Status de Prazos</div>
+              <div class="chart-container" style="height:160px;">
+                <canvas id="dlDonutChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div style="font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;">📝 Provas no Semestre</div>
+              <div class="chart-container" style="height:160px;">
+                <canvas id="examDonutChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════ -->
+      <!--  TAB: PERFIL                   -->
+      <!-- ══════════════════════════════ -->
+      <div id="tab-perfil" class="tab-content">
+        <div class="section-title">Perfil & Configurações</div>
+        <div class="section-sub">Atualize suas informações a qualquer momento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="grid-2col">
+          <div class="card">
+            <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">📋 Informações Acadêmicas</div>
+            <div class="form-group"><label class="form-label">Curso</label><input id="pCourse" class="input-field" type="text"></div>
+            <div class="form-group"><label class="form-label">Instituição</label><input id="pInst" class="input-field" type="text"></div>
+            <div class="form-group"><label class="form-label">Semestre</label>
+              <select id="pSem" class="input-field">
+                <option value="1">1º</option><option value="2">2º</option><option value="3">3º</option>
+                <option value="4">4º</option><option value="5">5º</option><option value="6">6º</option>
+                <option value="7">7º</option><option value="8">8º</option><option value="9">9º</option><option value="10">10º</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="App.saveProfile()">Salvar Perfil</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div class="card">
+              <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">🎯 Meta & Semestre</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="form-group">
+                <div><label class="form-label">Horas/dia</label>
+                  <select id="pGoalH" class="input-field">
+                    <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                    <option>5</option><option>6</option><option>8</option><option>10</option><option>12</option>
+                  </select>
+                </div>
+                <div><label class="form-label">Min extras</label>
+                  <select id="pGoalM" class="input-field"><option>0</option><option>15</option><option>30</option><option>45</option></select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="form-group">
+                <div><label class="form-label">Início Semestre</label><input id="pSemStart" class="input-field" type="date"></div>
+                <div><label class="form-label">Fim Semestre</label><input id="pSemEnd" class="input-field" type="date"></div>
+              </div>
+              <button class="btn btn-primary btn-full" onclick="App.saveGoal()">Atualizar</button>
+            </div>
+            <div class="card" style="border:1px solid #fecaca;background:#fff8f8;">
+              <div style="font-size:14px;font-weight:700;color:#dc2626;margin-bottom:7px;">⚠️ Zona de Risco</div>
+              <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Remove permanentemente todos os seus dados desta conta.</p>
+              <button class="btn btn-danger btn-sm" onclick="App.clearUserData()">Apagar Meus Dados</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-content -->
+</div><!-- /appScreen -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  MODALS                                          -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- Disciplina Modal -->
+<div class="modal-overlay" id="subModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 style="font-size:18px;font-weight:800;">Nova Disciplina</h3>
+      <button class="modal-close" onclick="UI.closeModals()">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Nome *</label><input id="mSubName" class="input-field" type="text" placeholder="Ex: Cálculo I, Anatomia…"></div>
+    <div class="form-group"><label class="form-label">Professor(a) *</label><input id="mSubProf" class="input-field" type="text" placeholder="Nome do(a) professor(a)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;" class="form-group">
+      <div><label class="form-label">Dia</label>
+        <select id="mSubDay" class="input-field">
+          <option value="0">Dom</option><option value="1">Seg</option><option value="2">Ter</option>
+          <option value="3">Qua</option><option value="4">Qui</option><option value="5">Sex</option><option value="6">Sáb</option>
+        </select>
+      </div>
+      <div><label class="form-label">Início</label><input id="mSubStart" class="input-field" type="time" value="08:00"></div>
+      <div><label class="form-label">Fim</label><input id="mSubEnd" class="input-field" type="time" value="10:00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Sala / Local</label><input id="mSubRoom" class="input-field" type="text" placeholder="Ex: Sala 203, Lab B…"></div>
+    <div class="form-group">
+      <label class="form-label">Cor</label>
+      <div id="colorPicker" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;"></div>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="UI.closeModals()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="App.saveSub()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prazo Modal -->
+<div class="modal-overlay" id="dlModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 style="font-size:18px;font-weight:800;">Novo Prazo</h3>
+      <button class="modal-close" onclick="UI.closeModals()">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Título *</label><input id="mDlTitle" class="input-field" type="text" placeholder="Ex: Prova P1 de Cálculo…"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="form-group">
+      <div><label class="form-label">Tipo</label>
+        <select id="mDlType" class="input-field">
+          <option value="Prova">📝 Prova</option><option value="Trabalho">📄 Trabalho</option>
+          <option value="Seminário">🎤 Seminário</option><option value="Inscrição">📋 Inscrição</option><option value="Outro">📌 Outro</option>
+        </select>
+      </div>
+      <div><label class="form-label">Prioridade</label>
+        <select id="mDlPrio" class="input-field">
+          <option value="Alta">🔴 Alta</option><option value="Média">🟡 Média</option><option value="Baixa">🟢 Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="form-group">
+      <div><label class="form-label">Data *</label><input id="mDlDate" class="input-field" type="date"></div>
+      <div><label class="form-label">Hora</label><input id="mDlTime" class="input-field" type="time" value="23:59"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Disciplina Relacionada</label><input id="mDlSubj" class="input-field" type="text" placeholder="Opcional"></div>
+    <div class="form-group"><label class="form-label">Observações</label><textarea id="mDlNotes" class="input-field" placeholder="Capítulos, requisitos…"></textarea></div>
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="UI.closeModals()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="App.saveDL()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  JAVASCRIPT — MODULES                            -->
+<!-- ═══════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════
+//  MODULE: Theme — Dark / Light mode
+// ════════════════════════════════════════════════════════
+const Theme = (() => {
+  const KEY = 'hub_theme';
+  function _isDark() { return document.documentElement.classList.contains('dark'); }
+
+  function _apply(dark, animate) {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem(KEY, dark ? 'dark' : 'light');
+    _syncUI(dark);
+    if (animate) {
+      document.documentElement.style.opacity = '.92';
+      setTimeout(() => { document.documentElement.style.opacity = '1'; document.documentElement.style.transition = ''; }, 200);
+    }
+    // Rebuild charts with new palette
+    if (typeof Charts !== 'undefined') {
+      try { Charts.refresh(); } catch(e) {}
+    }
+  }
+
+  function _syncUI(dark) {
+    // Top-bar knob
+    const knob = document.getElementById('themeKnob');
+    const ico  = document.getElementById('themeIco');
+    if (knob) knob.style.transform = dark ? 'translateX(24px)' : 'translateX(0)';
+    if (ico)  ico.textContent = dark ? '🌙' : '☀️';
+    // Login toggle
+    const lIco = document.getElementById('loginThemeIco');
+    const lTxt = document.getElementById('loginThemeTxt');
+    if (lIco) lIco.textContent = dark ? '🌙' : '☀️';
+    if (lTxt) lTxt.textContent = dark ? 'Escuro' : 'Claro';
+    // Sidebar bg variable is already handled by CSS
+  }
+
+  function toggle() { _apply(!_isDark(), true); }
+
+  function init() {
+    const stored = localStorage.getItem(KEY);
+    const pref   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    _apply((stored || pref) === 'dark', false);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem(KEY)) _apply(e.matches, true);
+    });
+  }
+
+  // Read CSS variables for Chart.js
+  function getChartColors() {
+    const s = getComputedStyle(document.documentElement);
+    const get = v => s.getPropertyValue(v).trim();
+    return {
+      grid:    get('--chart-grid')    || 'rgba(0,0,0,.06)',
+      text:    get('--chart-text')    || '#6b7a99',
+      tick:    get('--chart-tick')    || '#94a3b8',
+      primary: get('--primary')       || '#2E5A9E',
+      green:   get('--accent-green')  || '#22c55e',
+      card:    get('--card')          || '#ffffff',
+    };
+  }
+
+  function isDark() { return _isDark(); }
+  return { toggle, init, getChartColors, isDark };
+})();
+
+
+
+// ════════════════════════════════════════════════
+//  MODULE: Auth — Authentication & Session
+// ════════════════════════════════════════════════
+const Auth = (() => {
+  const ACCT_KEY    = 'hub_acct_v2';
+  const SESS_KEY    = 'hub_sess_v2';
+  const LOCK_KEY    = 'hub_lk_em';
+  const INACTIVITY  = 25 * 60 * 1000; // 25 min
+
+  let _key   = null;
+  let _email = null;
+  let _lastAct = Date.now();
+  let _ticker  = null;
+
+  // ── Crypto helpers
+  const _sha   = s => CryptoJS.SHA256(s).toString(CryptoJS.enc.Hex);
+  const _pbkdf = (pwd, salt) =>
+    CryptoJS.PBKDF2(pwd, salt, { keySize: 256/32, iterations: 1000 }).toString();
+
+  // ── Validation
+  const validateEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
+
+  function validatePassword(p) {
+    if (p.length < 8)                return 'Mínimo 8 caracteres';
+    if (!/[A-Z]/.test(p))            return 'Adicione uma letra maiúscula';
+    if (!/[0-9]/.test(p))            return 'Adicione um número';
+    if (!/[^A-Za-z0-9]/.test(p))    return 'Adicione um símbolo (!@#$...)';
+    return null;
+  }
+
+  function strength(p) {
+    let s = 0;
+    if (p.length >= 8)             s++;
+    if (p.length >= 12)            s++;
+    if (/[A-Z]/.test(p))          s++;
+    if (/[a-z]/.test(p))          s++;
+    if (/[0-9]/.test(p))          s++;
+    if (/[^A-Za-z0-9]/.test(p))   s++;
+    return Math.round((s / 6) * 100);
+  }
+
+  // ── Register
+  function register(name, email, pwd) {
+    email = email.toLowerCase().trim();
+    if (!name.trim())             return { error: 'Nome é obrigatório' };
+    if (!validateEmail(email))    return { error: 'E-mail inválido' };
+    const pwdErr = validatePassword(pwd);
+    if (pwdErr)                   return { error: pwdErr };
+
+    const accts = _getAccounts();
+    if (accts[email])             return { error: 'E-mail já cadastrado' };
+
+    accts[email] = { name: name.trim(), hash: _sha(pwd + email), created: Date.now() };
+    _saveAccounts(accts);
+    return { ok: true };
+  }
+
+  // ── Login
+  function login(email, pwd) {
+    email = email.toLowerCase().trim();
+    const accts = _getAccounts();
+    const acct  = accts[email];
+    if (!acct || acct.hash !== _sha(pwd + email)) return { error: 'Credenciais inválidas' };
+
+    _key      = _pbkdf(pwd, email);
+    _email    = email;
+    _lastAct  = Date.now();
+    _saveSession();
+    _startWatcher();
+    return { ok: true, name: acct.name };
+  }
+
+  // ── Demo login (creates demo account if needed)
+  function demoLogin() {
+    const dEmail = 'demo@myunihub.app';
+    const dPwd   = 'Demo@2025!';
+    const accts  = _getAccounts();
+    if (!accts[dEmail]) {
+      accts[dEmail] = { name: 'Estudante Demo', hash: _sha(dPwd + dEmail), created: Date.now() };
+      _saveAccounts(accts);
+    }
+    return login(dEmail, dPwd);
+  }
+
+  // ── Session check on page load
+  function checkSession() {
+    try {
+      const raw = sessionStorage.getItem(SESS_KEY);
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      if (!s?.key || !s?.email) return false;
+      _key     = s.key;
+      _email   = s.email;
+      _lastAct = Date.now();
+      _startWatcher();
+      return true;
+    } catch { return false; }
+  }
+
+  // ── Lock (inactivity)
+  function lock() {
+    if (_email) localStorage.setItem(LOCK_KEY, _email);
+    _key = null;
+    sessionStorage.removeItem(SESS_KEY);
+    clearInterval(_ticker);
+  }
+
+  // ── Unlock after lock screen
+  function unlock(pwd) {
+    const email  = _email || localStorage.getItem(LOCK_KEY);
+    if (!email) return { error: 'Sessão expirada. Faça login.' };
+    const accts  = _getAccounts();
+    const acct   = accts[email];
+    if (!acct || acct.hash !== _sha(pwd + email)) return { error: 'Senha incorreta' };
+    _key     = _pbkdf(pwd, email);
+    _email   = email;
+    _lastAct = Date.now();
+    _saveSession();
+    _startWatcher();
+    return { ok: true };
+  }
+
+  // ── Logout
+  function logout() {
+    clearInterval(_ticker);
+    _key = null; _email = null;
+    sessionStorage.removeItem(SESS_KEY);
+    localStorage.removeItem(LOCK_KEY);
+  }
+
+  // ── Internal helpers
+  function _getAccounts() {
+    try { return JSON.parse(localStorage.getItem(ACCT_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function _saveAccounts(a) { localStorage.setItem(ACCT_KEY, JSON.stringify(a)); }
+  function _saveSession() {
+    sessionStorage.setItem(SESS_KEY, JSON.stringify({ email: _email, key: _key, ts: _lastAct }));
+  }
+  function _startWatcher() {
+    clearInterval(_ticker);
+    ['mousemove','keydown','click','touchstart'].forEach(ev =>
+      document.addEventListener(ev, () => { _lastAct = Date.now(); }, { passive: true })
+    );
+    _ticker = setInterval(() => {
+      if (Date.now() - _lastAct > INACTIVITY) {
+        Auth.lock();
+        document.getElementById('lockScreen').classList.add('visible');
+      }
+    }, 30_000);
+  }
+
+  function getKey()   { return _key; }
+  function getEmail() { return _email; }
+  function getName()  {
+    const accts = _getAccounts();
+    return accts[_email]?.name || 'Usuário';
+  }
+
+  return { register, login, demoLogin, checkSession, lock, unlock, logout,
+           getKey, getEmail, getName, validateEmail, validatePassword, strength };
+})();
+
+// ════════════════════════════════════════════════
+//  MODULE: Store — Encrypted Persistence
+// ════════════════════════════════════════════════
+const Store = (() => {
+  // Encrypt data with AES before storing
+  function _enc(data) {
+    const k = Auth.getKey();
+    if (!k) return JSON.stringify(data);
+    return CryptoJS.AES.encrypt(JSON.stringify(data), k).toString();
+  }
+
+  // Decrypt AES ciphertext
+  function _dec(cipher) {
+    const k = Auth.getKey();
+    if (!k) { try { return JSON.parse(cipher); } catch { return null; } }
+    try {
+      const bytes = CryptoJS.AES.decrypt(cipher, k);
+      return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    } catch { return null; }
+  }
+
+  // Namespaced key per user (prevents data leakage between accounts)
+  const ns = k => `hub_${(Auth.getEmail() || 'anon').replace(/[^a-z0-9]/g,'_')}_${k}`;
+
+  function save(k, v) {
+    try { localStorage.setItem(ns(k), _enc(v)); } catch { /* quota exceeded */ }
+  }
+
+  function load(k, fallback = null) {
+    const raw = localStorage.getItem(ns(k));
+    if (raw === null) return fallback;
+    const result = _dec(raw);
+    return result !== null ? result : fallback;
+  }
+
+  function remove(k) { localStorage.removeItem(ns(k)); }
+
+  function clearAll() {
+    const prefix = `hub_${(Auth.getEmail() || 'anon').replace(/[^a-z0-9]/g,'_')}_`;
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(prefix))
+      .forEach(k => localStorage.removeItem(k));
+  }
+
+  return { save, load, remove, clearAll };
+})();
+
+// ════════════════════════════════════════════════
+//  MODULE: Charts — Chart.js Analytics
+// ════════════════════════════════════════════════
+const Charts = (() => {
+  let _studyChart = null, _dlDonut = null, _examDonut = null;
+
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.color       = '#6b7a99';
+
+  function init() {
+    _buildSemBar();
+    _buildInsights();
+    _buildStudyLine();
+    _buildDlDonut();
+    _buildExamDonut();
+  }
+
+  function _buildSemBar() {
+    const p = S.profile;
+    const area  = document.getElementById('semBarArea');
+    const pctEl = document.getElementById('semPctLabel');
+
+    if (!p?.semStart || !p?.semEnd) {
+      area.innerHTML = `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:8px 0;">
+        ⚠️ Configure as datas do semestre em <strong>Perfil</strong> para ativar este indicador.
+      </p>`;
+      pctEl.textContent = '—';
+      return;
+    }
+
+    const start   = new Date(p.semStart);
+    const end     = new Date(p.semEnd);
+    const now     = new Date();
+    const pct     = Math.min(Math.max(((now - start) / (end - start)) * 100, 0), 100).toFixed(1);
+    const daysLeft = Math.max(Math.ceil((end - now) / 86400000), 0);
+
+    pctEl.textContent = pct + '%';
+    document.getElementById('semFill').style.width   = pct + '%';
+    document.getElementById('semFill').textContent   = pct > 15 ? pct + '%' : '';
+    document.getElementById('semStart').textContent  = start.toLocaleDateString('pt-BR', {day:'2-digit',month:'short'});
+    document.getElementById('semEnd').textContent    = end.toLocaleDateString('pt-BR', {day:'2-digit',month:'short'});
+    document.getElementById('semDaysLeft').textContent = `${daysLeft} dias restantes`;
+  }
+
+  function _buildInsights() {
+    const p       = S.profile;
+    const goal    = p?.goalMinutes || 480;
+    const today   = new Date().toISOString().split('T')[0];
+    const todaySec = S.studyHistory[today] || S.timer.totalToday || 0;
+    const todayMin = Math.round(todaySec / 60);
+    const todayPct = Math.min(Math.round((todayMin / goal) * 100), 200);
+
+    // Weekly average (excluding today)
+    let weekSec = 0, wDays = 0;
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = d.toISOString().split('T')[0];
+      if (S.studyHistory[k]) { weekSec += S.studyHistory[k]; wDays++; }
+    }
+    const weekAvgMin = wDays > 0 ? Math.round(weekSec / wDays / 60) : 0;
+    const diff       = todayMin - weekAvgMin;
+
+    // Completed this week
+    const weekAgo   = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+    const donePast7 = S.deadlines.filter(d =>
+      d.completed && d.completedAt && new Date(d.completedAt) > weekAgo
+    ).length;
+
+    // Upcoming exams (next 30 days)
+    const now = new Date();
+    const provasNext30 = S.deadlines.filter(d => {
+      const dt = new Date(d.date + 'T12:00');
+      return d.type === 'Prova' && !d.completed && dt > now &&
+             dt < new Date(now.getTime() + 30 * 86400000);
+    }).length;
+
+    const insights = [
+      {
+        icon: todayPct >= 100 ? '🏆' : todayPct >= 80 ? '🎯' : '📚',
+        label: 'Meta de Hoje',
+        value: `${todayPct}% atingida`,
+        color: todayPct >= 100 ? 'var(--accent-green)' : todayPct >= 80 ? 'var(--primary)' : 'var(--accent-amber)'
+      },
+      {
+        icon: diff >= 0 ? '📈' : '📉',
+        label: 'vs. Média Semanal',
+        value: diff === 0 ? 'Na média' : `${Math.abs(diff)}min ${diff > 0 ? 'acima' : 'abaixo'}`,
+        color: diff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
+      },
+      {
+        icon: '✅',
+        label: 'Concluídos (7 dias)',
+        value: `${donePast7} prazo${donePast7 !== 1 ? 's' : ''}`,
+        color: 'var(--primary)'
+      },
+      {
+        icon: provasNext30 === 0 ? '🟢' : provasNext30 >= 3 ? '🔴' : '🟡',
+        label: 'Provas (30 dias)',
+        value: `${provasNext30} prova${provasNext30 !== 1 ? 's' : ''}`,
+        color: provasNext30 === 0 ? 'var(--accent-green)' : provasNext30 >= 3 ? 'var(--accent-red)' : 'var(--accent-amber)'
+      }
+    ];
+
+    document.getElementById('insightCards').innerHTML = insights.map(ins => `
+      <div class="stat-card" style="border-color:${ins.color};">
+        <div style="font-size:26px;margin-bottom:7px;">${ins.icon}</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">${ins.label}</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;color:${ins.color};">${ins.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function _buildStudyLine() {
+    const ctx = document.getElementById('studyLineChart');
+    if (!ctx) return;
+    if (_studyChart) { _studyChart.destroy(); _studyChart = null; }
+
+    const c = Theme.getChartColors();
+    const labels = [], actual = [];
+    const goal   = S.profile?.goalMinutes || 480;
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      labels.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+      actual.push(Math.round((S.studyHistory[d.toISOString().split('T')[0]] || 0) / 60));
+    }
+    const baseFont = { family: "'DM Sans', sans-serif", size: 12 };
+    _studyChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Estudado (min)',
+            data: actual,
+            borderColor: c.primary,
+            backgroundColor: Theme.isDark() ? 'rgba(91,141,224,.12)' : 'rgba(46,90,158,.1)',
+            fill: true, tension: 0.4,
+            pointBackgroundColor: c.primary, pointRadius: 5
+          },
+          {
+            label: 'Meta (min)',
+            data: Array(7).fill(goal),
+            borderColor: c.green,
+            borderDash: [6, 4],
+            pointRadius: 0, fill: false, tension: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { color: c.text, boxWidth: 12, font: baseFont } }
+        },
+        scales: {
+          x: { ticks: { color: c.tick, font: baseFont }, grid: { color: c.grid, borderColor: c.grid } },
+          y: { beginAtZero: true, ticks: { color: c.tick, font: baseFont }, grid: { color: c.grid, borderColor: c.grid },
+               title: { display: true, text: 'Minutos', color: c.text, font: baseFont } }
+        }
+      }
+    });
+  }
+
+  function _buildDlDonut() {
+    const ctx = document.getElementById('dlDonutChart');
+    if (!ctx) return;
+    if (_dlDonut) { _dlDonut.destroy(); _dlDonut = null; }
+    const c = Theme.getChartColors();
+    const baseFont = { family: "'DM Sans', sans-serif", size: 11 };
+    const total = S.deadlines.length, done = S.deadlines.filter(d => d.completed).length;
+    _dlDonut = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Concluídos', 'Pendentes'],
+        datasets: [{ data: total === 0 ? [0, 1] : [done, total - done],
+          backgroundColor: ['#22c55e', Theme.isDark() ? '#334155' : '#e5e7eb'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: c.text, boxWidth: 11, font: baseFont } },
+          tooltip: { enabled: total > 0 }
+        }
+      }
+    });
+  }
+
+  function _buildExamDonut() {
+    const ctx = document.getElementById('examDonutChart');
+    if (!ctx) return;
+    if (_examDonut) { _examDonut.destroy(); _examDonut = null; }
+    const c = Theme.getChartColors();
+    const baseFont = { family: "'DM Sans', sans-serif", size: 11 };
+    const now = new Date(), provas = S.deadlines.filter(d => d.type === 'Prova');
+    const done = provas.filter(d => d.completed || new Date(d.date + 'T23:59') < now).length;
+    _examDonut = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Realizadas', 'Restantes'],
+        datasets: [{ data: provas.length === 0 ? [0, 1] : [done, provas.length - done],
+          backgroundColor: [c.primary, Theme.isDark() ? '#334155' : '#bfdbfe'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: c.text, boxWidth: 11, font: baseFont } },
+          tooltip: { enabled: provas.length > 0 }
+        }
+      }
+    });
+  }
+
+  function refresh() {
+    [_studyChart, _dlDonut, _examDonut].forEach(ch => { try { if(ch) ch.destroy(); } catch(e){} });
+    _studyChart = null; _dlDonut = null; _examDonut = null;
+    init();
+  }
+
+  return { init, refresh };
+})();
+
+// ════════════════════════════════════════════════
+//  MODULE: UI — Interface Utilities
+// ════════════════════════════════════════════════
+const UI = (() => {
+  const COLORS = ['#2E5A9E','#7C3AED','#DC2626','#D97706','#059669','#DB2777','#0891B2','#EA580C'];
+  let selColor = COLORS[0];
+  let setupStep = 1;
+
+  // ── Auth tabs
+  function authTab(tab) {
+    document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('atbLogin').classList.toggle('active',    tab === 'login');
+    document.getElementById('atbRegister').classList.toggle('active', tab === 'register');
+  }
+
+  // ── Login
+  function doLogin() {
+    const email = document.getElementById('lEmail').value.trim();
+    const pwd   = document.getElementById('lPass').value;
+    const err   = document.getElementById('loginErr');
+    err.classList.remove('show');
+    const result = Auth.login(email, pwd);
+    if (!result.ok) { err.textContent = result.error; err.classList.add('show'); return; }
+    _afterLogin();
+  }
+
+  // ── Demo login
+  function demoLogin() {
+    const result = Auth.demoLogin();
+    if (result.ok) _afterLogin();
+  }
+
+  // ── Register
+  function doRegister() {
+    const name  = document.getElementById('rName').value.trim();
+    const email = document.getElementById('rEmail').value.trim();
+    const pwd   = document.getElementById('rPass').value;
+    const pwd2  = document.getElementById('rPass2').value;
+    const err   = document.getElementById('registerErr');
+    err.classList.remove('show');
+
+    if (pwd !== pwd2) { err.textContent = 'As senhas não conferem'; err.classList.add('show'); return; }
+    const result = Auth.register(name, email, pwd);
+    if (!result.ok) { err.textContent = result.error; err.classList.add('show'); return; }
+
+    // Auto-login after register
+    Auth.login(email, pwd);
+    _afterLogin();
+    toast('🎉 Conta criada com sucesso!');
+  }
+
+  function _afterLogin() {
+    App.loadState();
+    if (!S.profile) {
+      _showScreen('setupScreen');
+    } else {
+      App.initApp();
+      _showScreen('appScreen');
+    }
+  }
+
+  // ── Password strength meter
+  function updatePwdStrength() {
+    const pwd  = document.getElementById('rPass').value;
+    const pct  = Auth.strength(pwd);
+    const fill = document.getElementById('pwdFill');
+    const lbl  = document.getElementById('pwdLabel');
+    fill.style.width = pct + '%';
+    if (pct < 40)      { fill.style.background = '#ef4444'; lbl.textContent = 'Fraca'; lbl.style.color = '#ef4444'; }
+    else if (pct < 70) { fill.style.background = '#f59e0b'; lbl.textContent = 'Moderada'; lbl.style.color = '#f59e0b'; }
+    else               { fill.style.background = '#22c55e'; lbl.textContent = 'Forte ✓'; lbl.style.color = '#22c55e'; }
+  }
+
+  // ── Unlock (lock screen)
+  function doUnlock() {
+    const pwd = document.getElementById('lockPwd').value;
+    const err = document.getElementById('lockErr');
+    err.classList.remove('show');
+    const result = Auth.unlock(pwd);
+    if (!result.ok) { err.textContent = result.error; err.classList.add('show'); return; }
+    document.getElementById('lockScreen').classList.remove('visible');
+    document.getElementById('lockPwd').value = '';
+    toast('🔓 Sessão restaurada!');
+  }
+
+  // ── Logout
+  function doLogout() {
+    App.pauseTimer();
+    App.persistAll();
+    Auth.logout();
+    document.getElementById('lockScreen').classList.remove('visible');
+    _showScreen('loginScreen');
+    // Reset login form
+    document.getElementById('lEmail').value = '';
+    document.getElementById('lPass').value  = '';
+    document.getElementById('loginErr').classList.remove('show');
+  }
+
+  // ── Setup wizard
+  function setupGo(step) {
+    if (step === 2) {
+      if (!document.getElementById('sCourse').value.trim() ||
+          !document.getElementById('sInst').value.trim()) {
+        alert('Preencha curso e instituição antes de continuar.'); return;
+      }
+    }
+    document.getElementById('stp' + setupStep).style.display = 'none';
+    document.getElementById('sb'  + setupStep).classList.remove('active');
+    document.getElementById('sb'  + setupStep).classList.add('done');
+    setupStep = step;
+    document.getElementById('stp' + step).style.display = 'block';
+    if (step <= 3) document.getElementById('sb' + step).classList.add('active');
+  }
+
+  function finishSetup() {
+    const h = parseInt(document.getElementById('sGoalH').value);
+    const m = parseInt(document.getElementById('sGoalM').value);
+    S.profile = {
+      course:      document.getElementById('sCourse').value.trim(),
+      institution: document.getElementById('sInst').value.trim(),
+      semester:    document.getElementById('sSem').value,
+      goalMinutes: h * 60 + m,
+      semStart:    document.getElementById('sSemStart').value || '',
+      semEnd:      document.getElementById('sSemEnd').value   || ''
+    };
+    App.persistAll();
+    App.initApp();
+    _showScreen('appScreen');
+  }
+
+  // ── Tab switching
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    const navEl = document.getElementById('nav-' + tab);
+    if (navEl) navEl.classList.add('active');
+
+    if (tab === 'hoje')       App.renderToday();
+    if (tab === 'planos')     App.renderPlanos();
+    if (tab === 'prazos')     App.renderDeadlines();
+    if (tab === 'calendario') App.renderCal();
+    if (tab === 'progresso')  Charts.refresh();
+    if (tab === 'perfil')     App.loadProfileForm();
+  }
+
+  // ── Modals
+  function openSubModal() {
+    selColor = COLORS[0];
+    document.getElementById('colorPicker').innerHTML = COLORS.map(c => `
+      <div class="color-swatch ${c === selColor ? 'selected' : ''}"
+           style="background:${c};" onclick="UI.pickColor('${c}',this)"></div>
+    `).join('');
+    ['mSubName','mSubProf','mSubRoom'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('mSubDay').value   = '1';
+    document.getElementById('mSubStart').value = '08:00';
+    document.getElementById('mSubEnd').value   = '10:00';
+    document.getElementById('subModal').classList.add('open');
+  }
+
+  function openDlModal() {
+    ['mDlTitle','mDlSubj','mDlNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('mDlDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('mDlTime').value = '23:59';
+    document.getElementById('dlModal').classList.add('open');
+  }
+
+  function closeModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+  }
+
+  function pickColor(c, el) {
+    selColor = c;
+    document.querySelectorAll('.color-swatch').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function getSelColor() { return selColor; }
+
+  // ── Screen helper
+  function _showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block'; t.style.opacity = '1';
+    clearTimeout(t._to);
+    t._to = setTimeout(() => {
+      t.style.opacity = '0';
+      setTimeout(() => { t.style.display = 'none'; }, 320);
+    }, 2800);
+  }
+
+  // Keyboard shortcuts on modals
+  document.querySelectorAll('.modal-overlay').forEach(m =>
+    m.addEventListener('click', e => { if (e.target === m) closeModals(); })
+  );
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModals();
+    if (e.key === 'Enter' && document.getElementById('lockScreen').classList.contains('visible')) doUnlock();
+    if (e.key === 'Enter' && document.getElementById('loginScreen').classList.contains('active')) {
+      if (document.getElementById('loginForm').style.display !== 'none') doLogin();
+    }
+  });
+
+  return {
+    authTab, doLogin, demoLogin, doRegister, doUnlock, doLogout,
+    updatePwdStrength, setupGo, finishSetup, switchTab,
+    openSubModal, openDlModal, closeModals, pickColor, getSelColor, showToast
+  };
+})();
+
+// ════════════════════════════════════════════════
+//  APP STATE & CORE LOGIC
+// ════════════════════════════════════════════════
+const COLORS_LIST = ['#2E5A9E','#7C3AED','#DC2626','#D97706','#059669','#DB2777','#0891B2','#EA580C'];
+const DAYS      = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const DAYS_S    = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS    = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const T_EMOJI   = { Prova:'📝', Trabalho:'📄', Seminário:'🎤', Inscrição:'📋', Outro:'📌' };
+const P_COLOR   = { Alta:'#ef4444', Média:'#f59e0b', Baixa:'#22c55e' };
+
+let S = {
+  profile:      null,
+  subjects:     [],
+  deadlines:    [],
+  checklist:    { date: '', items: [] },
+  studyHistory: {},
+  timer:        { seconds:0, running:false, todayDate:'', totalToday:0, overtime:0 },
+  calDate:      new Date()
+};
+let timerIv  = null;
+let dlFilter = 'all';
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function toast(msg) { UI.showToast(msg); }
+function fmtDate(y, m, d) { return `${y}-${pad(m)}-${pad(d)}`; }
+
+// ── App namespace for clean exports
+const App = {
+
+  // ── State I/O ───────────────────────────────
+  loadState() {
+    S.profile       = Store.load('profile',      null);
+    S.subjects      = Store.load('subjects',     []);
+    S.deadlines     = Store.load('deadlines',    []);
+    S.checklist     = Store.load('checklist',    { date: '', items: [] });
+    S.studyHistory  = Store.load('studyHistory', {});
+
+    const today  = new Date().toDateString();
+    const td     = Store.load('timer', null);
+    if (td && td.todayDate === today) {
+      S.timer = { seconds: td.totalToday || 0, running: false, todayDate: today,
+                  totalToday: td.totalToday || 0, overtime: td.overtime || 0 };
+    } else {
+      S.timer = { seconds: 0, running: false, todayDate: today, totalToday: 0, overtime: 0 };
+    }
+    this._checkMidnightReset();
+  },
+
+  persistAll() {
+    this._updateStudyHistory();
+    Store.save('profile',      S.profile);
+    Store.save('subjects',     S.subjects);
+    Store.save('deadlines',    S.deadlines);
+    Store.save('checklist',    S.checklist);
+    Store.save('studyHistory', S.studyHistory);
+    Store.save('timer', {
+      todayDate:  S.timer.todayDate,
+      totalToday: S.timer.totalToday,
+      overtime:   S.timer.overtime
+    });
+  },
+
+  _updateStudyHistory() {
+    const today = new Date().toISOString().split('T')[0];
+    if (!S.studyHistory) S.studyHistory = {};
+    S.studyHistory[today] = S.timer.totalToday;
+    // Keep last 90 days only
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    Object.keys(S.studyHistory).forEach(k => {
+      if (new Date(k) < cutoff) delete S.studyHistory[k];
+    });
+  },
+
+  // ── Midnight checklist reset ────────────────
+  _checkMidnightReset() {
+    const today = new Date().toDateString();
+    if (S.checklist.date && S.checklist.date !== today) {
+      // Archive completion count silently (used in analytics)
+      S.checklist = { date: today, items: [] };
+    }
+    if (!S.checklist.date) S.checklist.date = today;
+  },
+
+  // ── App initialization ───────────────────────
+  initApp() {
+    this._updateTopBar();
+    this._updateTimerUI();
+    this.renderToday();
+    this.renderPlanos();
+    this.renderDeadlines();
+    this.renderCal();
+    this._refreshBadge();
+    // Switch to hoje tab
+    UI.switchTab('hoje');
+  },
+
+  _updateTopBar() {
+    const p = S.profile; if (!p) return;
+    const hr = new Date().getHours();
+    const name = Auth.getName().split(' ')[0];
+    const greet = hr < 12 ? '☀️ Bom dia' : hr < 18 ? '🌤 Boa tarde' : '🌙 Boa noite';
+    document.getElementById('topGreeting').textContent = `${greet}, ${name}!`;
+    document.getElementById('topDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('topInst').textContent = p.institution || '';
+    document.getElementById('topSem').textContent  = `${p.semester}º Sem — ${p.course || ''}`;
+    const h = Math.floor((p.goalMinutes || 480) / 60), m = (p.goalMinutes || 480) % 60;
+    document.getElementById('topGoal').textContent = m ? `${h}h ${m}min` : `${h}h`;
+    document.getElementById('sbName').textContent   = Auth.getName().split(' ').slice(0,2).join(' ');
+    document.getElementById('sbCourse').textContent = p.course || '';
+
+    const todayStr = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+    document.getElementById('todaySubtitle').textContent = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
+    document.getElementById('todayDayName').textContent  = DAYS[new Date().getDay()];
+  },
+
+  // ── TIMER ────────────────────────────────────
+  toggleTimer() {
+    if (S.timer.running) {
+      this.pauseTimer();
+    } else {
+      S.timer.running = true;
+      document.getElementById('timerBtn').textContent = '⏸';
+      document.getElementById('timerLbl').textContent = 'Estudando…';
+      timerIv = setInterval(() => {
+        S.timer.seconds++;
+        S.timer.totalToday = S.timer.seconds;
+        this._updateTimerUI();
+        if (S.timer.seconds % 30 === 0) this.persistAll();
+      }, 1000);
+    }
+  },
+
+  pauseTimer() {
+    if (!S.timer.running) return;
+    clearInterval(timerIv); timerIv = null;
+    S.timer.running = false;
+    S.timer.totalToday = S.timer.seconds;
+    document.getElementById('timerBtn').textContent = '▶';
+    document.getElementById('timerLbl').textContent = 'Pausado';
+    this.persistAll();
+  },
+
+  resetTimer() {
+    if (!confirm('Resetar o cronômetro? O tempo de hoje será zerado.')) return;
+    this.pauseTimer();
+    S.timer = { ...S.timer, seconds:0, totalToday:0, overtime:0, running:false };
+    document.getElementById('timerLbl').textContent = 'Pronto';
+    document.getElementById('otPill').style.display = 'none';
+    this._updateTimerUI();
+    this.persistAll();
+  },
+
+  timerInfo() {
+    const sec  = S.timer.totalToday;
+    const H    = Math.floor(sec / 3600), M = Math.floor((sec % 3600) / 60);
+    const goal = S.profile?.goalMinutes || 480;
+    const gH   = Math.floor(goal / 60), gM = goal % 60;
+    alert(`📋 Resumo de Hoje\n\nEstudado: ${H}h ${M}min\nMeta: ${gH}h ${gM ? gM + 'min' : ''}\nData: ${new Date().toLocaleDateString('pt-BR')}`);
+  },
+
+  _updateTimerUI() {
+    const sec  = S.timer.seconds;
+    const H = Math.floor(sec / 3600), M = Math.floor((sec % 3600) / 60), SC = sec % 60;
+    document.getElementById('timerDigits').textContent = `${pad(H)}:${pad(M)}:${pad(SC)}`;
+
+    const goal  = (S.profile?.goalMinutes || 480) * 60;
+    const pct   = Math.min(sec / goal, 1);
+    const circ  = 2 * Math.PI * 82;
+    const offset = circ - pct * circ;
+    const ring   = document.getElementById('timerRing');
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = sec >= goal ? '#f59e0b' : 'var(--primary)';
+
+    const isOT = sec >= goal;
+    document.getElementById('otPill').style.display = isOT ? 'inline-flex' : 'none';
+    document.getElementById('otSec').style.display  = isOT ? 'block' : 'none';
+    if (isOT) {
+      const ot = sec - goal;
+      const otH = Math.floor(ot / 3600), otM = Math.floor((ot % 3600) / 60);
+      document.getElementById('otVal').textContent = otH ? `${otH}h ${otM}min` : `${otM}min`;
+      S.timer.overtime = ot;
+    }
+
+    const studH = Math.floor(sec / 3600), studM = Math.floor((sec % 3600) / 60);
+    document.getElementById('studiedToday').textContent = `${studH}h ${studM}min`;
+    const rem = Math.max(goal - sec, 0);
+    const rH  = Math.floor(rem / 3600), rM = Math.floor((rem % 3600) / 60);
+    document.getElementById('timeRemain').textContent = isOT ? '🎉 Meta atingida!' : `${rH}h ${rM}min`;
+
+    const pctN = Math.min(Math.round(pct * 100), 100);
+    document.getElementById('progPct').textContent  = pctN + '%';
+    document.getElementById('progFill').style.width = pctN + '%';
+    document.getElementById('progFill').classList.toggle('overtime', isOT);
+  },
+
+  // ── CHECKLIST ────────────────────────────────
+  openTaskInput() {
+    const qa = document.getElementById('quickAdd');
+    qa.style.display = 'flex';
+    document.getElementById('taskInp').focus();
+  },
+
+  cancelTask() {
+    document.getElementById('quickAdd').style.display = 'none';
+    document.getElementById('taskInp').value = '';
+  },
+
+  submitTask() {
+    const text = document.getElementById('taskInp').value.trim();
+    if (!text) return;
+    S.checklist.items.push({ id: Date.now(), text, done: false });
+    document.getElementById('taskInp').value = '';
+    document.getElementById('quickAdd').style.display = 'none';
+    this.persistAll();
+    this.renderChecklist();
+  },
+
+  toggleChk(id) {
+    const item = S.checklist.items.find(i => i.id === id);
+    if (item) { item.done = !item.done; this.persistAll(); this.renderChecklist(); }
+  },
+
+  delChk(id) {
+    S.checklist.items = S.checklist.items.filter(i => i.id !== id);
+    this.persistAll();
+    this.renderChecklist();
+  },
+
+  renderChecklist() {
+    const items = S.checklist.items;
+    const done  = items.filter(i => i.done).length;
+    const pct   = items.length ? Math.round((done / items.length) * 100) : 0;
+
+    document.getElementById('chkRatio').textContent = `${done}/${items.length}`;
+    const fill = document.getElementById('chkFill');
+    fill.style.width      = pct + '%';
+    fill.style.background = pct === 100
+      ? 'linear-gradient(90deg,#22c55e,#16a34a)'
+      : 'linear-gradient(90deg,var(--primary),var(--primary-light))';
+
+    const list = document.getElementById('chkList');
+    if (!items.length) {
+      list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">
+        Clique em <strong>+ Tarefa</strong> para adicionar metas de hoje.
+      </div>`;
+      return;
+    }
+    list.innerHTML = items.map(item => `
+      <div class="chk-item ${item.done ? 'done-item' : ''}">
+        <div class="chk-box ${item.done ? 'checked' : ''}" onclick="App.toggleChk(${item.id})">
+          ${item.done ? '✓' : ''}
+        </div>
+        <div class="chk-text ${item.done ? 'struck' : ''}">${item.text}</div>
+        <button class="chk-del" onclick="App.delChk(${item.id})">✕</button>
+      </div>
+    `).join('');
+  },
+
+  // ── TODAY TAB ────────────────────────────────
+  renderToday() {
+    this._updateTopBar();
+    this.renderChecklist();
+
+    const dayIdx    = new Date().getDay();
+    const todaySubs = S.subjects.filter(s => Number(s.day) === dayIdx)
+                                .sort((a,b) => a.start.localeCompare(b.start));
+    const cont = document.getElementById('todaySchedule');
+
+    if (!todaySubs.length) {
+      cont.innerHTML = `<div class="empty"><div class="empty-icon">🏖️</div><strong>Sem aulas hoje!</strong>Bom dia para revisar ou descansar.</div>`;
+      return;
+    }
+    cont.innerHTML = todaySubs.map((s, i) => `
+      <div class="tl-item">
+        <div class="tl-time">${s.start}<br>${s.end}</div>
+        <div class="tl-spine">
+          <div class="tl-dot" style="background:${s.color}"></div>
+          ${i < todaySubs.length - 1 ? '<div class="tl-line"></div>' : ''}
+        </div>
+        <div class="tl-body" style="border-color:${s.color}">
+          <div style="font-weight:700;font-size:14px;">${s.name}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">👤 ${s.prof}${s.room ? ' · 📍 ' + s.room : ''}</div>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  // ── SUBJECTS ────────────────────────────────
+  saveSub() {
+    const name  = document.getElementById('mSubName').value.trim();
+    const prof  = document.getElementById('mSubProf').value.trim();
+    const day   = parseInt(document.getElementById('mSubDay').value);
+    const start = document.getElementById('mSubStart').value;
+    const end   = document.getElementById('mSubEnd').value;
+    const room  = document.getElementById('mSubRoom').value.trim();
+
+    if (!name || !prof)   { alert('Nome e professor são obrigatórios.'); return; }
+    if (!start || !end)   { alert('Horário é obrigatório.'); return; }
+    if (start >= end)     { alert('Início deve ser antes do término.'); return; }
+
+    S.subjects.push({ id: Date.now(), name, prof, day, start, end, room, color: UI.getSelColor() });
+    this.persistAll();
+    UI.closeModals();
+    this.renderPlanos();
+    this.renderToday();
+    toast('Disciplina adicionada!');
+  },
+
+  delSub(id) {
+    if (!confirm('Remover esta disciplina?')) return;
+    S.subjects = S.subjects.filter(s => s.id !== id);
+    this.persistAll();
+    this.renderPlanos();
+    this.renderToday();
+    toast('Disciplina removida.');
+  },
+
+  renderPlanos() {
+    this._renderLegend();
+    this._renderWeekGrid();
+    this._renderSubCards();
+  },
+
+  _renderLegend() {
+    const leg    = document.getElementById('subjLegend');
+    const unique = [...new Map(S.subjects.map(s => [s.name, s])).values()];
+    leg.innerHTML = unique.map(s => `
+      <div style="display:flex;align-items:center;gap:7px;padding:4px 11px;background:#fff;border-radius:99px;font-size:12px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.07);">
+        <div style="width:8px;height:8px;background:${s.color};border-radius:50%;"></div>${s.name}
+      </div>
+    `).join('');
+  },
+
+  _renderWeekGrid() {
+    const grid = document.getElementById('weekGrid');
+    if (!S.subjects.length) {
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><strong>Grade vazia</strong>Adicione disciplinas para visualizar.</div>`;
+      return;
+    }
+    const times  = new Set();
+    S.subjects.forEach(s => {
+      let cur = parseInt(s.start.split(':')[0]) * 60 + parseInt(s.start.split(':')[1]);
+      const en = parseInt(s.end.split(':')[0]) * 60 + parseInt(s.end.split(':')[1]);
+      while (cur < en) {
+        times.add(`${pad(Math.floor(cur / 60))}:${pad(cur % 60)}`);
+        cur += 60;
+      }
+    });
+    const slots   = [...times].sort();
+    const todayI  = new Date().getDay();
+    let html = '<div class="schedule-grid">';
+    html += '<div class="sg-header plain" style="font-size:10px;">Hora</div>';
+    DAYS_S.forEach((d, i) => { html += `<div class="sg-header ${i === todayI ? 'today-col' : ''}">${d}</div>`; });
+    slots.forEach((t, ri) => {
+      const rowClass = ri % 2 === 0 ? 'sg-row-even' : 'sg-row-odd';
+      html += `<div class="sg-time ${rowClass}">${t}</div>`;
+      for (let d = 0; d < 7; d++) {
+        const here = S.subjects.filter(s => Number(s.day) === d && s.start <= t && s.end > t);
+        if (here.length) {
+          html += `<div class="sg-cell ${rowClass}"><div class="sg-pill" style="background:${here[0].color}">
+            <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${here[0].name}</div>
+          </div></div>`;
+        } else {
+          html += `<div class="sg-cell ${rowClass}"></div>`;
+        }
+      }
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+  },
+
+  _renderSubCards() {
+    const cont = document.getElementById('subjCards');
+    if (!S.subjects.length) {
+      cont.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📚</div><strong>Nenhuma disciplina</strong>Adicione sua primeira disciplina.</div>`;
+      return;
+    }
+    cont.innerHTML = S.subjects.map(s => `
+      <div class="subj-card" style="border-color:${s.color}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="min-width:0;">
+            <div style="font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;margin-bottom:3px;">${s.name}</div>
+            <div style="font-size:12px;color:var(--text-muted);">👤 ${s.prof}</div>
+          </div>
+          <button class="btn btn-danger btn-xs" onclick="App.delSub(${s.id})">🗑</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;">
+          <span class="chip chip-blue">📅 ${DAYS[s.day]}</span>
+          <span class="chip chip-slate">🕐 ${s.start}–${s.end}</span>
+          ${s.room ? `<span class="chip chip-slate">📍 ${s.room}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+  },
+
+  // ── DEADLINES ────────────────────────────────
+  saveDL() {
+    const title = document.getElementById('mDlTitle').value.trim();
+    const date  = document.getElementById('mDlDate').value;
+    if (!title || !date) { alert('Título e data são obrigatórios.'); return; }
+
+    S.deadlines.push({
+      id:    Date.now(),
+      title,
+      type:  document.getElementById('mDlType').value,
+      prio:  document.getElementById('mDlPrio').value,
+      date,
+      time:  document.getElementById('mDlTime').value,
+      subj:  document.getElementById('mDlSubj').value.trim(),
+      notes: document.getElementById('mDlNotes').value.trim(),
+      completed:   false,
+      completedAt: null
+    });
+    S.deadlines.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+    this.persistAll();
+    UI.closeModals();
+    this.renderDeadlines();
+    this.renderCal();
+    this._refreshBadge();
+    toast('Prazo adicionado!');
+  },
+
+  toggleDLDone(id) {
+    const d = S.deadlines.find(x => x.id === id);
+    if (!d) return;
+    d.completed   = !d.completed;
+    d.completedAt = d.completed ? new Date().toISOString() : null;
+    this.persistAll();
+    this.renderDeadlines();
+    this._refreshBadge();
+    toast(d.completed ? '✅ Prazo concluído!' : 'Prazo reaberto.');
+  },
+
+  delDL(id) {
+    if (!confirm('Remover este prazo?')) return;
+    S.deadlines = S.deadlines.filter(d => d.id !== id);
+    this.persistAll();
+    this.renderDeadlines();
+    this.renderCal();
+    this._refreshBadge();
+    toast('Prazo removido.');
+  },
+
+  filterDL(type) {
+    dlFilter = type;
+    document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+    const fp = document.getElementById('fp-' + type);
+    if (fp) fp.classList.add('active');
+    this.renderDeadlines();
+  },
+
+  renderDeadlines() {
+    const now  = new Date();
+    let list   = S.deadlines;
+    if (dlFilter !== 'all') list = list.filter(d => d.type === dlFilter);
+
+    const cont = document.getElementById('dlList');
+    if (!list.length) {
+      cont.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><strong>Nenhum prazo aqui!</strong>Cadastre prazos para não perder entregas.</div>`;
+      return;
+    }
+
+    cont.innerHTML = list.map(d => {
+      const deadline = new Date(`${d.date}T${d.time || '23:59'}`);
+      const diff     = deadline - now;
+      const days     = Math.ceil(diff / 864e5);
+      const overdue  = diff < 0;
+
+      let cText, cColor;
+      if (d.completed)    { cText = '✅ Feito'; cColor = '#22c55e'; }
+      else if (overdue)   { cText = 'Vencido';   cColor = '#ef4444'; }
+      else if (days === 0){ cText = 'Hoje!';     cColor = '#ef4444'; }
+      else if (days === 1){ cText = 'Amanhã';    cColor = '#f59e0b'; }
+      else                { cText = `${days}d`;  cColor = days <= 7 ? '#f59e0b' : '#6b7a99'; }
+
+      const pClass = { Alta:'dl-alta', Média:'dl-media', Baixa:'dl-baixa' }[d.prio] || 'dl-baixa';
+
+      return `
+        <div class="dl-item ${pClass} ${d.completed ? 'completed-dl' : ''}">
+          <div style="font-size:24px;flex-shrink:0;">${T_EMOJI[d.type] || '📌'}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;${d.completed ? 'text-decoration:line-through;' : ''}">${d.title}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <span class="chip chip-blue">${d.type}</span>
+              ${d.subj ? `<span class="chip chip-slate">${d.subj}</span>` : ''}
+              <span style="font-size:11px;color:var(--text-muted);">📅 ${new Date(d.date + 'T12:00').toLocaleDateString('pt-BR')}${d.time ? ' · 🕐 ' + d.time : ''}</span>
+            </div>
+            ${d.notes ? `<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${d.notes.slice(0,60)}${d.notes.length > 60 ? '…' : ''}</div>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <div style="font-family:'Outfit',sans-serif;font-size:19px;font-weight:800;color:${cColor};">${cText}</div>
+            <div style="display:flex;gap:5px;">
+              <button class="btn btn-xs ${d.completed ? 'btn-ghost' : 'btn-success'}" onclick="App.toggleDLDone(${d.id})">${d.completed ? '↩' : '✓'}</button>
+              <button class="btn btn-danger btn-xs" onclick="App.delDL(${d.id})">🗑</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  _refreshBadge() {
+    const now    = new Date();
+    const urgent = S.deadlines.filter(d => {
+      if (d.completed) return false;
+      const diff = new Date(`${d.date}T${d.time || '23:59'}`) - now;
+      return diff > 0 && diff < 7 * 864e5;
+    }).length;
+    const badge = document.getElementById('prazBadge');
+    badge.style.display = urgent ? 'inline-flex' : 'none';
+    badge.textContent   = urgent;
+  },
+
+  // ── CALENDAR ────────────────────────────────
+  renderCal() {
+    const dt   = S.calDate;
+    const yr   = dt.getFullYear(), mo = dt.getMonth();
+    document.getElementById('calTitle').textContent = `${MONTHS[mo]} ${yr}`;
+
+    const first  = new Date(yr, mo, 1).getDay();
+    const inMo   = new Date(yr, mo + 1, 0).getDate();
+    const prevL  = new Date(yr, mo, 0).getDate();
+    const today  = fmtDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+
+    const dlMap = {};
+    S.deadlines.forEach(d => {
+      if (!dlMap[d.date]) dlMap[d.date] = [];
+      dlMap[d.date].push(d);
+    });
+
+    let html = '', day = 1, nxt = 1;
+    for (let i = 0; i < 42; i++) {
+      let num, ds, dim = false;
+      if (i < first) {
+        num = prevL - first + i + 1; dim = true;
+        ds  = fmtDate(mo === 0 ? yr - 1 : yr, mo === 0 ? 12 : mo, num);
+      } else if (day <= inMo) {
+        num = day++; ds = fmtDate(yr, mo + 1, num);
+      } else {
+        num = nxt++; dim = true;
+        ds  = fmtDate(mo === 11 ? yr + 1 : yr, mo === 11 ? 1 : mo + 2, num);
+      }
+      const isTd = ds === today;
+      const evts = dlMap[ds] || [];
+      html += `
+        <div class="cal-day ${isTd ? 'today-day' : ''} ${evts.length && !isTd ? 'has-ev' : ''} ${dim ? 'dim' : ''}">
+          <span style="font-weight:${isTd ? '800' : '500'};">${num}</span>
+          <div class="cal-dot-row">
+            ${evts.slice(0, 5).map(e => `<div class="cal-dot" style="background:${isTd ? '#fff' : (e.completed ? '#22c55e' : P_COLOR[e.prio])};"></div>`).join('')}
+          </div>
+        </div>`;
+    }
+    document.getElementById('calGrid').innerHTML = html;
+    this._renderUpcoming();
+  },
+
+  _renderUpcoming() {
+    const now = new Date();
+    const up  = S.deadlines
+      .filter(d => !d.completed && new Date(`${d.date}T${d.time || '23:59'}`) >= now)
+      .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`))
+      .slice(0, 6);
+
+    const cont = document.getElementById('upcomingEvts');
+    if (!up.length) {
+      cont.innerHTML = `<div class="empty"><div class="empty-icon">✨</div><strong>Sem eventos próximos</strong>Adicione prazos para vê-los aqui.</div>`;
+      return;
+    }
+    cont.innerHTML = up.map(d => {
+      const diff = new Date(`${d.date}T${d.time || '23:59'}`) - now;
+      const days = Math.ceil(diff / 864e5);
+      const pClass = { Alta:'dl-alta', Média:'dl-media', Baixa:'dl-baixa' }[d.prio] || 'dl-baixa';
+      return `
+        <div class="dl-item ${pClass}">
+          <div style="font-size:22px;">${T_EMOJI[d.type] || '📌'}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">${d.title}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+              📅 ${new Date(d.date + 'T12:00').toLocaleDateString('pt-BR', { day:'numeric', month:'long' })}${d.time ? ' · ' + d.time : ''}
+            </div>
+          </div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:15px;color:${days <= 3 ? '#ef4444' : days <= 7 ? '#f59e0b' : '#6b7a99'};">
+            ${days === 1 ? 'Amanhã' : days + 'd'}
+          </div>
+        </div>`;
+    }).join('');
+  },
+
+  prevMon() { S.calDate.setMonth(S.calDate.getMonth() - 1); this.renderCal(); },
+  nextMon() { S.calDate.setMonth(S.calDate.getMonth() + 1); this.renderCal(); },
+
+  // ── PROFILE ──────────────────────────────────
+  loadProfileForm() {
+    const p = S.profile; if (!p) return;
+    document.getElementById('pCourse').value   = p.course      || '';
+    document.getElementById('pInst').value     = p.institution || '';
+    document.getElementById('pSem').value      = p.semester    || '1';
+    document.getElementById('pGoalH').value    = Math.floor((p.goalMinutes || 480) / 60);
+    document.getElementById('pGoalM').value    = (p.goalMinutes || 480) % 60;
+    document.getElementById('pSemStart').value = p.semStart    || '';
+    document.getElementById('pSemEnd').value   = p.semEnd      || '';
+  },
+
+  saveProfile() {
+    if (!S.profile) S.profile = {};
+    S.profile.course      = document.getElementById('pCourse').value.trim();
+    S.profile.institution = document.getElementById('pInst').value.trim();
+    S.profile.semester    = document.getElementById('pSem').value;
+    this.persistAll();
+    this._updateTopBar();
+    toast('Perfil atualizado!');
+  },
+
+  saveGoal() {
+    if (!S.profile) S.profile = {};
+    const h = parseInt(document.getElementById('pGoalH').value);
+    const m = parseInt(document.getElementById('pGoalM').value);
+    S.profile.goalMinutes = h * 60 + m;
+    S.profile.semStart    = document.getElementById('pSemStart').value;
+    S.profile.semEnd      = document.getElementById('pSemEnd').value;
+    this.persistAll();
+    this._updateTopBar();
+    this._updateTimerUI();
+    toast('Meta e datas atualizadas!');
+  },
+
+  clearUserData() {
+    if (!confirm('⚠️ Todos os seus dados serão apagados permanentemente. Continuar?')) return;
+    this.pauseTimer();
+    Store.clearAll();
+    Auth.logout();
+    location.reload();
+  }
+};
+
+// ════════════════════════════════════════════════
+//  ENTRY POINT — on page load
+// ════════════════════════════════════════════════
+(function init() {
+  Theme.init(); // apply saved/detected theme
+  // Set today's date on DL modal
+  const todayISO = new Date().toISOString().split('T')[0];
+
+  // Check if user has an active session
+  if (Auth.checkSession()) {
+    App.loadState();
+    if (!S.profile) {
+      // Logged in but no profile → setup
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('setupScreen').classList.add('active');
+    } else {
+      App.initApp();
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('appScreen').classList.add('active');
+    }
+  }
+  // else: loginScreen is shown by default (active in HTML)
+
+  // Set default date on deadline modal when it opens
+  document.getElementById('mDlDate').value = todayISO;
+
+  // Enter key for task input
+  document.getElementById('taskInp')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') App.submitTask();
+    if (e.key === 'Escape') App.cancelTask();
+  });
+})();
+</script>
+</body>
+</html>
