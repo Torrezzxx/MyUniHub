@@ -283,6 +283,124 @@
 
     /* ── Logo mark ── */
     .logo-hex { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+
+    /* ════════════════════════════════════════
+       ONBOARDING TUTORIAL SYSTEM
+    ════════════════════════════════════════ */
+    #obOverlay {
+      position:fixed;inset:0;z-index:9000;pointer-events:all;
+      transition:opacity .4s ease;
+    }
+    #obOverlay.hidden-ob { opacity:0;pointer-events:none; }
+    #obSpotlight {
+      position:absolute;border-radius:22px;
+      transition:all .55s cubic-bezier(.4,0,.2,1);
+      box-shadow:0 0 0 9999px rgba(6,12,26,.78),0 0 0 3px rgba(46,90,158,.6),0 0 40px 6px rgba(46,90,158,.35);
+      pointer-events:none;
+    }
+    #obSpotlight::before,#obSpotlight::after {
+      content:'';position:absolute;inset:-6px;border-radius:inherit;
+      border:2px solid rgba(46,90,158,.55);
+      animation:obRingPulse 2s ease-in-out infinite;
+    }
+    #obSpotlight::after {
+      inset:-12px;border-color:rgba(124,92,191,.35);animation-delay:.4s;
+    }
+    @keyframes obRingPulse {
+      0%,100%{transform:scale(1);opacity:.8;}50%{transform:scale(1.04);opacity:.3;}
+    }
+    #obCard {
+      position:fixed;z-index:9001;width:340px;max-width:calc(100vw - 32px);
+      transition:all .45s cubic-bezier(.4,0,.2,1),opacity .35s ease;
+    }
+    @keyframes obCardIn {
+      from{opacity:0;transform:scale(.9) translateY(12px);}
+      to{opacity:1;transform:scale(1) translateY(0);}
+    }
+    .ob-card-inner {
+      background:rgba(255,255,255,.97);
+      backdrop-filter:blur(24px) saturate(200%);
+      -webkit-backdrop-filter:blur(24px) saturate(200%);
+      border-radius:24px;border:1px solid rgba(255,255,255,.7);
+      box-shadow:0 24px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.8);
+      padding:28px 26px 22px;overflow:hidden;position:relative;
+    }
+    .dark .ob-card-inner {
+      background:rgba(15,23,42,.95);border-color:rgba(255,255,255,.1);
+      box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
+    }
+    .ob-card-inner::before {
+      content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,#2E5A9E,#7c5cbf,#2E5A9E);
+      background-size:200% 100%;animation:obGradMove 3s linear infinite;
+    }
+    @keyframes obGradMove{0%{background-position:0%}100%{background-position:200%}}
+    .ob-dot {
+      width:8px;height:8px;border-radius:50%;background:rgba(46,90,158,.22);
+      transition:all .3s ease;cursor:pointer;
+    }
+    .ob-dot.active {width:22px;border-radius:4px;background:linear-gradient(90deg,#2E5A9E,#7c5cbf);}
+    .ob-arrow {position:absolute;width:0;height:0;border:9px solid transparent;}
+    .ob-arrow.down  {border-top-color:rgba(255,255,255,.95);bottom:-18px;left:50%;transform:translateX(-50%);}
+    .ob-arrow.up    {border-bottom-color:rgba(255,255,255,.95);top:-18px;left:50%;transform:translateX(-50%);}
+    .ob-arrow.left  {border-right-color:rgba(255,255,255,.95);left:-18px;top:50%;transform:translateY(-50%);}
+    .ob-arrow.right {border-left-color:rgba(255,255,255,.95);right:-18px;top:50%;transform:translateY(-50%);}
+    .dark .ob-arrow.down  {border-top-color:rgba(15,23,42,.95);}
+    .dark .ob-arrow.up    {border-bottom-color:rgba(15,23,42,.95);}
+    .dark .ob-arrow.left  {border-right-color:rgba(15,23,42,.95);}
+    .dark .ob-arrow.right {border-left-color:rgba(15,23,42,.95);}
+    .ob-mascot {font-size:44px;display:inline-block;animation:obFloat 2.8s ease-in-out infinite;}
+    @keyframes obFloat {
+      0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-8px) rotate(3deg);}
+    }
+    .ob-text-enter{animation:obTextIn .35s ease forwards;}
+    @keyframes obTextIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .ob-confetti{position:fixed;inset:0;z-index:9010;pointer-events:none;overflow:hidden;}
+    .ob-confetti-piece {
+      position:absolute;width:10px;height:10px;border-radius:2px;
+      animation:obConfettiFall linear forwards;top:-20px;
+    }
+    @keyframes obConfettiFall {
+      0%{transform:translateY(0) rotate(0) scale(1);opacity:1;}
+      100%{transform:translateY(100vh) rotate(720deg) scale(.4);opacity:0;}
+    }
+    .ob-beacon {
+      position:fixed;z-index:9002;width:16px;height:16px;border-radius:50%;
+      background:#2E5A9E;pointer-events:none;
+      box-shadow:0 0 0 0 rgba(46,90,158,.5);
+      animation:obBeaconPulse 1.5s ease-out infinite;
+      transition:all .5s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes obBeaconPulse {
+      0%{box-shadow:0 0 0 0 rgba(46,90,158,.55);}
+      70%{box-shadow:0 0 0 16px rgba(46,90,158,0);}
+      100%{box-shadow:0 0 0 0 rgba(46,90,158,0);}
+    }
+    .ob-progress-track{height:3px;background:rgba(46,90,158,.12);border-radius:2px;overflow:hidden;}
+    .ob-progress-fill{height:100%;background:linear-gradient(90deg,#2E5A9E,#7c5cbf);border-radius:2px;transition:width .5s ease;}
+    .ob-btn-next {
+      background:linear-gradient(135deg,#2E5A9E,#7c5cbf);color:white;border:none;border-radius:14px;
+      padding:11px 22px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+      box-shadow:0 4px 16px rgba(46,90,158,.35);transition:transform .18s ease,box-shadow .18s ease;
+    }
+    .ob-btn-next:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(46,90,158,.45);}
+    .ob-btn-skip {
+      background:transparent;border:none;color:#94a3b8;
+      font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;
+      padding:8px 12px;border-radius:10px;transition:color .2s,background .2s;
+    }
+    .ob-btn-skip:hover{color:#64748b;background:rgba(0,0,0,.05);}
+    .dark .ob-btn-skip:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+    /* ── Plan view pills (supplement existing .pf-pill) ── */
+    .pf-pill {
+      background:rgba(255,255,255,.55);
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      border-color:rgba(255,255,255,.35);color:#64748b;transition:all .18s;
+    }
+    .dark .pf-pill{background:rgba(15,23,42,.48);border-color:rgba(255,255,255,.07);color:#94a3b8;}
+    .pf-pill.active{background:linear-gradient(135deg,#2E5A9E,#7c5cbf)!important;color:white!important;border-color:#2E5A9E!important;}
+    .pv-btn.active{background:linear-gradient(135deg,#2E5A9E,#7c5cbf);color:white;}
+
   </style>
 </head>
 
@@ -1296,7 +1414,14 @@ window.doRegister = async () => {
   try {
     const cred = await createUserWithEmailAndPassword(auth,e,p);
     uid = cred.user.uid;
-    await setDoc(uDoc(),{profile:{name,course:'',institution:'',semester:'1',goalMinutes:480,semStart:'',semEnd:''},subjects:[],deadlines:[],checklist:{date:new Date().toDateString(),items:[]},studyHistory:{},timer:{date:new Date().toDateString(),totalToday:0,overtime:0}});
+    await setDoc(uDoc(),{
+      profile:{name,course:'',institution:'',semester:'1',goalMinutes:480,semStart:'',semEnd:''},
+      subjects:[],deadlines:[],weekPlans:[],
+      checklist:{date:new Date().toDateString(),items:[]},
+      studyHistory:{},
+      timer:{date:new Date().toDateString(),totalToday:0,overtime:0},
+      onboardingComplete: false   /* ← triggers tutorial after first setup */
+    });
   } catch(ex) { $('registerErr').textContent=ex.message; $('registerErr').classList.remove('hidden'); }
 };
 window.demoLogin = async () => {
@@ -1318,6 +1443,10 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(uDoc());
   if (!snap.exists()||!snap.data().profile?.course) { show('setupScreen'); return; }
   startListener(); show('appScreen'); initApp();
+  // If account is fresh (returned after page refresh before finishing onboarding)
+  if (snap.data()?.onboardingComplete === false) {
+    setTimeout(() => Onboarding.start(snap.data()?.profile?.name || 'você'), 1000);
+  }
 });
 
 // ── SETUP WIZARD ─────────────────────────────────────────
@@ -1334,8 +1463,13 @@ window.finishSetup = async () => {
   const h=parseInt($('sGoalH').value),m=parseInt($('sGoalM').value);
   const snap=await getDoc(uDoc()); const ex=snap.exists()?(snap.data().profile||{}):{};
   D.profile={...ex,course:$('sCourse').value.trim(),institution:$('sInst').value.trim(),semester:$('sSem').value,goalMinutes:h*60+m,semStart:$('sSemStart').value||'',semEnd:$('sSemEnd').value||''};
-  await setDoc(uDoc(),{profile:D.profile,subjects:[],deadlines:[],checklist:{date:new Date().toDateString(),items:[]},studyHistory:{},timer:{date:new Date().toDateString(),totalToday:0,overtime:0}},{merge:true});
+  await setDoc(uDoc(),{profile:D.profile,subjects:[],deadlines:[],weekPlans:[],checklist:{date:new Date().toDateString(),items:[]},studyHistory:{},timer:{date:new Date().toDateString(),totalToday:0,overtime:0}},{merge:true});
   startListener(); show('appScreen'); initApp();
+  // ── Check if onboarding is needed (new user) ──
+  const _snap2 = await getDoc(uDoc());
+  if (_snap2.exists() && _snap2.data().onboardingComplete === false) {
+    setTimeout(() => Onboarding.start(D.profile?.name || 'você'), 800);
+  }
 };
 
 // ── APP INIT ─────────────────────────────────────────────
@@ -2430,6 +2564,334 @@ function renderPlanKanban(list) {
   return wrap;
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   MODULE: Onboarding — Animated first-time tutorial
+   Steps: Welcome → Grade Horária → Planos Semanais →
+          Cronômetro → Prazos → Done 🎉
+════════════════════════════════════════════════════════════ */
+const Onboarding = (() => {
+  let _step = 0, _name = 'você', _steps = [], _active = false;
+
+  // ── Helpers ──────────────────────────────────
+  const $ob = id => document.getElementById(id);
+
+  function _rect(el) {
+    const r = el.getBoundingClientRect();
+    return { top:r.top, left:r.left, width:r.width, height:r.height };
+  }
+
+  // ── Step definitions ─────────────────────────
+  // Each step: { target (CSS selector or null), arrow direction,
+  //              cardPos (top|bottom|left|right|center),
+  //              mascot, title, body, tip, tab (to switch to before spotlight) }
+  function buildSteps(name) {
+    return [
+      {
+        target:   null,          // no spotlight → full intro
+        cardPos:  'center',
+        mascot:   '🎓',
+        title:    `Bem-vindo ao MyUniHub, ${name}!`,
+        body:     'Este é seu portal acadêmico personalizado. Em menos de 2 minutos vou te mostrar como tirar o máximo proveito de todas as funcionalidades.',
+        tip:      '💡 Você pode pular este tutorial a qualquer momento e acessá-lo novamente pelo menu de Perfil.',
+        btnLabel: 'Vamos lá! →',
+      },
+      {
+        target:   '#nav-planos',
+        tab:      'planos',
+        cardPos:  'right',
+        arrow:    'left',
+        mascot:   '📚',
+        title:    'Grade Horária',
+        body:     'Aqui você cadastra suas aulas semanais. Clique em <strong>+ Disciplina</strong> para adicionar o nome da matéria, professor, dia da semana e horário.',
+        tip:      '💡 A grade gera uma tabela visual automática. Suas aulas de hoje aparecem na aba "Hoje".',
+        btnLabel: 'Entendi! →',
+      },
+      {
+        target:   '#nav-semanal',
+        tab:      'semanal',
+        cardPos:  'right',
+        arrow:    'left',
+        mascot:   '📖',
+        title:    'Planos de Estudo Semanais',
+        body:     'Aqui você planeja o que vai estudar cada semana. Por exemplo: <em>Introdução à Computação → Sistemas Binários</em>. Adicione tópicos, estimativas de tempo e prioridade.',
+        tip:      '💡 Use a barra de adição rápida para criar planos em segundos. Visualize por Lista, Matéria ou Kanban.',
+        btnLabel: 'Show me! →',
+      },
+      {
+        target:   '#nav-prazos',
+        tab:      'prazos',
+        cardPos:  'right',
+        arrow:    'left',
+        mascot:   '⏰',
+        title:    'Prazos & Entregas',
+        body:     'Cadastre provas, trabalhos e seminários aqui. O sistema conta os dias automaticamente e destaca em vermelho qualquer prazo que vença em <strong>3 dias ou menos</strong>.',
+        tip:      '💡 Um banner de alerta aparece no topo da tela sempre que uma entrega estiver próxima.',
+        btnLabel: 'Próximo →',
+      },
+      {
+        target:   '#timerBtn',
+        tab:      'hoje',
+        cardPos:  'top',
+        arrow:    'down',
+        mascot:   '⏱️',
+        title:    'Cronômetro de Foco',
+        body:     'Pressione ▶ para iniciar o cronômetro de foco. Ele conta o tempo real de estudo e compara com sua meta diária. Funciona mesmo com a aba minimizada!',
+        tip:      '💡 Defina sua meta diária em <strong>Perfil → Meta de Estudo</strong>. O anel muda de cor ao atingir o objetivo.',
+        btnLabel: 'Quase lá →',
+      },
+      {
+        target:   '#nav-progresso',
+        tab:      'progresso',
+        cardPos:  'right',
+        arrow:    'left',
+        mascot:   '📈',
+        title:    'Dashboard de Progresso',
+        body:     'Acompanhe horas estudadas por semana, status dos prazos e provas realizadas em gráficos interativos. Também há um indicador do quanto do semestre já passou.',
+        tip:      '💡 Configure as datas de início e fim do semestre em <strong>Perfil</strong> para ativar a barra de progresso semestral.',
+        btnLabel: 'Finalizar 🎉',
+      },
+    ];
+  }
+
+  // ── Position the spotlight ────────────────────
+  function _spotlight(target) {
+    const overlay = $ob('obOverlay'), spot = $ob('obSpotlight');
+    if (!target) {
+      // No spotlight — just dark overlay without hole
+      overlay.classList.remove('hidden-ob');
+      spot.style.cssText = 'width:0;height:0;opacity:0;';
+      $ob('obBeacon').style.display = 'none';
+      return;
+    }
+    const el = document.querySelector(target);
+    if (!el) { _spotlight(null); return; }
+
+    const pad = 12;
+    const r = _rect(el);
+    overlay.classList.remove('hidden-ob');
+    spot.style.cssText = `
+      top:${r.top - pad}px; left:${r.left - pad}px;
+      width:${r.width + pad*2}px; height:${r.height + pad*2}px;
+      opacity:1;
+    `;
+
+    // Beacon dot — sits in center of target
+    const bc = $ob('obBeacon');
+    bc.style.display = 'block';
+    bc.style.top  = (r.top + r.height/2 - 8) + 'px';
+    bc.style.left = (r.left + r.width/2 - 8) + 'px';
+  }
+
+  // ── Position the card ────────────────────────
+  function _positionCard(target, cardPos, arrowDir) {
+    const card = $ob('obCard');
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const cw = 356, ch = 320; // approx card dimensions
+
+    let top, left;
+    const MARGIN = 20;
+
+    if (!target || cardPos === 'center') {
+      // Centered on screen
+      top  = vh/2 - ch/2;
+      left = vw/2 - cw/2;
+      $ob('obArrow').className = 'ob-arrow'; // no arrow
+    } else {
+      const el = document.querySelector(target);
+      const r  = el ? _rect(el) : { top:vh/2, left:vw/2, width:0, height:0 };
+
+      if (cardPos === 'right') {
+        left = r.left + r.width + 24;
+        top  = r.top + r.height/2 - ch/2;
+        $ob('obArrow').className = 'ob-arrow left';
+      } else if (cardPos === 'left') {
+        left = r.left - cw - 24;
+        top  = r.top + r.height/2 - ch/2;
+        $ob('obArrow').className = 'ob-arrow right';
+      } else if (cardPos === 'top') {
+        left = r.left + r.width/2 - cw/2;
+        top  = r.top - ch - 28;
+        $ob('obArrow').className = 'ob-arrow down';
+      } else if (cardPos === 'bottom') {
+        left = r.left + r.width/2 - cw/2;
+        top  = r.top + r.height + 28;
+        $ob('obArrow').className = 'ob-arrow up';
+      } else {
+        top  = vh/2 - ch/2;
+        left = vw/2 - cw/2;
+        $ob('obArrow').className = 'ob-arrow';
+      }
+
+      // Clamp inside viewport
+      left = Math.max(MARGIN, Math.min(left, vw - cw - MARGIN));
+      top  = Math.max(MARGIN, Math.min(top, vh - MARGIN - 400));
+    }
+
+    card.style.top  = top  + 'px';
+    card.style.left = left + 'px';
+  }
+
+  // ── Render step ──────────────────────────────
+  function _renderStep(idx) {
+    const step = _steps[idx];
+    if (!step) return;
+    const total = _steps.length;
+
+    // Switch tab first (so target exists in DOM)
+    if (step.tab && typeof window.switchTab === 'function') {
+      window.switchTab(step.tab);
+    }
+
+    // Small delay to let tab render before measuring
+    setTimeout(() => {
+      // Spotlight
+      _spotlight(step.target || null);
+      // Card position
+      _positionCard(step.target, step.cardPos, step.arrow);
+
+      // Card content
+      $ob('obMascot').textContent = step.mascot || '🎓';
+
+      $ob('obStepLabel').textContent = `Passo ${idx+1} de ${total}`;
+
+      // Progress bar
+      $ob('obProgressFill').style.width = `${((idx+1)/total)*100}%`;
+
+      // Dots
+      $ob('obDots').innerHTML = _steps.map((_,i) =>
+        `<div class="ob-dot${i===idx?' active':''}" onclick="window.obGoTo(${i})"></div>`
+      ).join('');
+
+      // Title & body (re-animate)
+      const titleEl = $ob('obTitle');
+      const bodyEl  = $ob('obBody');
+      const tipEl   = $ob('obTip');
+
+      titleEl.classList.remove('ob-text-enter');
+      bodyEl.classList.remove('ob-text-enter');
+      void titleEl.offsetWidth; // force reflow
+      titleEl.classList.add('ob-text-enter');
+      bodyEl.classList.add('ob-text-enter');
+
+      titleEl.innerHTML = step.title || '';
+      bodyEl.innerHTML  = step.body  || '';
+
+      if (step.tip) {
+        tipEl.innerHTML = step.tip;
+        tipEl.classList.remove('hidden');
+        tipEl.classList.remove('ob-text-enter');
+        void tipEl.offsetWidth;
+        tipEl.classList.add('ob-text-enter');
+      } else {
+        tipEl.classList.add('hidden');
+      }
+
+      // Button label
+      $ob('obNextBtn').innerHTML = (step.btnLabel || 'Próximo →');
+
+      // Show card
+      $ob('obCard').style.display = 'block';
+      $ob('obCard').style.animation = 'none';
+      void $ob('obCard').offsetWidth;
+      $ob('obCard').style.animation = 'obCardIn .4s cubic-bezier(.34,1.56,.64,1)';
+
+    }, step.tab ? 120 : 0);
+  }
+
+  // ── Confetti burst ───────────────────────────
+  function _confetti() {
+    const container = $ob('obConfetti');
+    container.style.display = 'block';
+    container.innerHTML = '';
+    const COLORS = ['#2E5A9E','#7c5cbf','#22c55e','#f59e0b','#ef4444','#4a7cc9','#db2777'];
+    for (let i = 0; i < 70; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'ob-confetti-piece';
+      piece.style.cssText = `
+        left:${Math.random()*100}%;
+        background:${COLORS[Math.floor(Math.random()*COLORS.length)]};
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        border-radius:${Math.random()>.5?'50%':'2px'};
+        animation-duration:${1.2+Math.random()*2}s;
+        animation-delay:${Math.random()*.8}s;
+      `;
+      container.appendChild(piece);
+    }
+    setTimeout(() => { container.style.display='none'; container.innerHTML=''; }, 4000);
+  }
+
+  // ── Complete & close ─────────────────────────
+  async function _complete() {
+    // Update Firestore
+    if (uid) {
+      await updateDoc(doc(db,'users',uid), { onboardingComplete: true }).catch(async () => {
+        await setDoc(doc(db,'users',uid), { onboardingComplete: true }, { merge:true }).catch(()=>{});
+      });
+    }
+    _hide();
+    _confetti();
+    setTimeout(() => toast('🎉 Tutorial completo! Bom estudo, ' + _name.split(' ')[0] + '!'), 400);
+  }
+
+  // ── Hide overlay & card ──────────────────────
+  function _hide() {
+    _active = false;
+    $ob('obOverlay').classList.add('hidden-ob');
+    $ob('obCard').style.display   = 'none';
+    $ob('obBeacon').style.display = 'none';
+  }
+
+  // ── Public API ───────────────────────────────
+  function start(name) {
+    if (_active) return;
+    _active = true;
+    _name   = name || 'você';
+    _step   = 0;
+    _steps  = buildSteps(_name);
+    _renderStep(0);
+  }
+
+  window.obNext = () => {
+    _step++;
+    if (_step >= _steps.length) { _complete(); }
+    else { _renderStep(_step); }
+  };
+
+  window.obGoTo = (i) => {
+    if (i < 0 || i >= _steps.length) return;
+    _step = i; _renderStep(_step);
+  };
+
+  window.obSkip = async () => {
+    if (uid) {
+      await updateDoc(doc(db,'users',uid), { onboardingComplete: true }).catch(async () => {
+        await setDoc(doc(db,'users',uid), { onboardingComplete: true }, { merge:true }).catch(()=>{});
+      });
+    }
+    _hide();
+    toast('Tutorial pulado. Acesse-o novamente em Perfil quando quiser.');
+  };
+
+  // Reflow on window resize
+  window.addEventListener('resize', () => {
+    if (!_active || _step >= _steps.length) return;
+    const step = _steps[_step];
+    _spotlight(step.target || null);
+    _positionCard(step.target, step.cardPos, step.arrow);
+  });
+
+  // Keyboard: Escape to skip, ArrowRight to advance
+  document.addEventListener('keydown', e => {
+    if (!_active) return;
+    if (e.key === 'ArrowRight' || e.key === 'Enter') window.obNext();
+    if (e.key === 'Escape') window.obSkip();
+  });
+
+  return { start };
+})();
+
 (function boot() {
   const dark=localStorage.getItem('hub_theme')==='dark'||(!localStorage.getItem('hub_theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
   syncThemeUI(dark);
@@ -2443,5 +2905,61 @@ function renderPlanKanban(list) {
   });
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════
+  ONBOARDING TUTORIAL OVERLAY
+═══════════════════════════════════════════════════════════ -->
+<!-- Dark backdrop with spotlight hole -->
+<div id="obOverlay" class="hidden-ob">
+  <div id="obSpotlight"></div>
+</div>
+
+<!-- Beacon dot (glowing pointer) -->
+<div id="obBeacon" class="ob-beacon" style="display:none"></div>
+
+<!-- Confetti container -->
+<div id="obConfetti" class="ob-confetti" style="display:none"></div>
+
+<!-- Floating tooltip card -->
+<div id="obCard" style="display:none">
+  <div class="ob-card-inner">
+    <!-- Arrow pointer (repositioned by JS) -->
+    <div id="obArrow" class="ob-arrow down"></div>
+
+    <!-- Top row: mascot + step info -->
+    <div class="flex items-start justify-between mb-3">
+      <div id="obMascot" class="ob-mascot">🎓</div>
+      <div class="text-right">
+        <div id="obStepLabel" class="text-[10px] font-black uppercase tracking-widest mb-0.5" style="color:#7c5cbf"></div>
+        <div class="ob-progress-track w-24">
+          <div id="obProgressFill" class="ob-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step dots -->
+    <div class="flex gap-2 items-center mb-4" id="obDots"></div>
+
+    <!-- Title -->
+    <div id="obTitle" class="font-extrabold text-lg text-slate-800 dark:text-white tracking-tight leading-tight mb-2 ob-text-enter"></div>
+
+    <!-- Body text -->
+    <div id="obBody" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-5 ob-text-enter" style="animation-delay:.08s"></div>
+
+    <!-- Tip (smaller, italicised hint) -->
+    <div id="obTip" class="hidden text-xs text-slate-400 dark:text-slate-500 italic leading-relaxed mb-4 ob-text-enter bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50"
+         style="animation-delay:.14s"></div>
+
+    <!-- Action row -->
+    <div class="flex items-center justify-between">
+      <button class="ob-btn-skip" onclick="window.obSkip()">Pular tutorial</button>
+      <button class="ob-btn-next" id="obNextBtn" onclick="window.obNext()">
+        Próximo <span style="margin-left:4px">→</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>
