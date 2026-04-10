@@ -907,19 +907,6 @@
           </div>
         </div>
 
-        <!-- ── Quick-add bar ── -->
-        <div id="quickPlanAdd" class="glass rounded-2xl border border-white/30 dark:border-white/8 p-3 mb-4 flex gap-2 items-center shadow-soft-sm">
-          <span class="text-lg flex-shrink-0">➕</span>
-          <input id="qpSubj" type="text" placeholder="Matéria (ex: Cálculo)" class="inp" style="flex:.8;min-width:0;padding:10px 14px;font-size:13px">
-          <input id="qpTopic" type="text" placeholder="Tópico a estudar…" class="inp" style="flex:1.6;min-width:0;padding:10px 14px;font-size:13px">
-          <select id="qpPrio" class="inp" style="flex:.5;min-width:80px;padding:10px 12px;font-size:12px">
-            <option value="Alta">🔴 Alta</option>
-            <option value="Média" selected>🟡 Média</option>
-            <option value="Baixa">🟢 Baixa</option>
-          </select>
-          <button onclick="window.quickAddPlan()" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl flex-shrink-0 shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Adicionar</button>
-        </div>
-
         <!-- ── Content area (renders by view mode) ── -->
         <div id="planContent"></div>
 
@@ -1217,24 +1204,161 @@
 </div>
 
 
-<div id="planModal" class="fixed inset-0 z-[800] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-  <div class="modal-box bg-white dark:bg-slate-800 rounded-2xl p-7 w-[520px] max-w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 animate-[scaleIn_.22s_ease]">
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="font-display font-extrabold text-slate-800 dark:text-white text-lg">Novo Plano de Estudo</h3>
-      <button onclick="window.closeModals()" class="w-9 h-9 rounded-2xl glass-subtle border text-slate-400 flex items-center justify-center text-sm transition hover:scale-110">✕</button>
-    </div>
-    <div class="space-y-4 mb-5">
-      <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Disciplina / Matéria *</label><input id="mPlanSubj" type="text" placeholder="Ex: Introdução à Computação" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 font-medium focus:border-ocean-700 focus:outline-none focus:ring-2 focus:ring-ocean-700/20 transition"></div>
-      <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Conteúdo / Tópico *</label><textarea id="mPlanTopic" rows="3" placeholder="Ex: História dos computadores e Sistemas Binários" class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 font-medium focus:border-ocean-700 focus:outline-none focus:ring-2 focus:ring-ocean-700/20 transition resize-none"></textarea></div>
-      <div class="grid grid-cols-2 gap-3">
-        <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Data Limite</label><input id="mPlanDate" type="date" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white font-medium focus:border-ocean-700 focus:outline-none transition"></div>
-        <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Prioridade</label><select id="mPlanPrio" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white font-medium focus:border-ocean-700 focus:outline-none transition"><option value="Alta">🔴 Alta</option><option value="Média" selected>🟡 Média</option><option value="Baixa">🟢 Baixa</option></select></div>
+<!-- ═══════════════════════════════════════
+  MODAL: NOVO PLANO DE ESTUDO SEMANAL
+  Disparado por "+ Novo Plano" na aba Planos Semanais
+════════════════════════════════════════ -->
+<div id="planModal"
+  class="fixed inset-0 z-[800] bg-black/55 backdrop-blur-md hidden items-center justify-center p-4"
+  onclick="window.handlePlanModalBackdrop(event)">
+  <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,.22)]
+              border border-white/60 dark:border-slate-700
+              w-[500px] max-w-full max-h-[90vh] overflow-y-auto
+              p-7 relative"
+       style="animation:scaleIn .24s cubic-bezier(.34,1.56,.64,1)">
+
+    <!-- Decorative top bar -->
+    <div class="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+         style="background:linear-gradient(90deg,#2E5A9E,#7c5cbf)"></div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 pt-1">
+      <div>
+        <h3 class="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight leading-none">
+          📖 Novo Plano de Estudo
+        </h3>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">
+          Sincronizado automaticamente com o Firebase ☁️
+        </p>
       </div>
-      <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Estimativa de Tempo</label><select id="mPlanTime" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white font-medium focus:border-ocean-700 focus:outline-none transition"><option value="">Não definida</option><option value="30min">30 minutos</option><option value="1h">1 hora</option><option value="2h">2 horas</option><option value="3h">3 horas</option><option value="4h+">4h ou mais</option></select></div>
+      <button id="planModalCloseBtn"
+              class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300
+                     flex items-center justify-center text-base hover:bg-slate-200 dark:hover:bg-slate-600
+                     hover:text-slate-600 dark:hover:text-white transition-all hover:scale-105 active:scale-95">
+        ✕
+      </button>
     </div>
+
+    <!-- Form fields -->
+    <div class="space-y-5 mb-6">
+
+      <!-- Disciplina -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+          Disciplina / Matéria <span class="text-red-400">*</span>
+        </label>
+        <input id="mPlanSubj" type="text"
+               placeholder="Ex: Introdução à Computação"
+               autocomplete="off"
+               class="w-full px-4 py-3.5 rounded-2xl
+                      border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70
+                      text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none
+                      focus:ring-4 focus:ring-[#2E5A9E]/10
+                      transition-all">
+      </div>
+
+      <!-- Tópico -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+          Conteúdo / Tópico a Estudar <span class="text-red-400">*</span>
+        </label>
+        <textarea id="mPlanTopic" rows="3"
+                  placeholder="Ex: História dos computadores e Sistemas Binários"
+                  class="w-full px-4 py-3.5 rounded-2xl resize-none
+                         border-2 border-slate-200 dark:border-slate-600
+                         bg-slate-50 dark:bg-slate-900/70
+                         text-sm font-medium text-slate-800 dark:text-white
+                         placeholder-slate-300 dark:placeholder-slate-600
+                         focus:border-[#2E5A9E] focus:outline-none
+                         focus:ring-4 focus:ring-[#2E5A9E]/10
+                         transition-all leading-relaxed"></textarea>
+      </div>
+
+      <!-- Data Limite + Prioridade -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+            Data Limite
+          </label>
+          <input id="mPlanDate" type="date"
+                 class="w-full px-4 py-3.5 rounded-2xl
+                        border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70
+                        text-sm font-medium text-slate-800 dark:text-white
+                        focus:border-[#2E5A9E] focus:outline-none
+                        focus:ring-4 focus:ring-[#2E5A9E]/10
+                        transition-all">
+        </div>
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+            Prioridade
+          </label>
+          <select id="mPlanPrio"
+                  class="w-full px-4 py-3.5 rounded-2xl
+                         border-2 border-slate-200 dark:border-slate-600
+                         bg-slate-50 dark:bg-slate-900/70
+                         text-sm font-medium text-slate-800 dark:text-white
+                         focus:border-[#2E5A9E] focus:outline-none
+                         focus:ring-4 focus:ring-[#2E5A9E]/10
+                         transition-all">
+            <option value="Alta">🔴 Alta</option>
+            <option value="Média" selected>🟡 Média</option>
+            <option value="Baixa">🟢 Baixa</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Estimativa de Tempo -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+          Estimativa de Tempo
+        </label>
+        <select id="mPlanTime"
+                class="w-full px-4 py-3.5 rounded-2xl
+                       border-2 border-slate-200 dark:border-slate-600
+                       bg-slate-50 dark:bg-slate-900/70
+                       text-sm font-medium text-slate-800 dark:text-white
+                       focus:border-[#2E5A9E] focus:outline-none
+                       focus:ring-4 focus:ring-[#2E5A9E]/10
+                       transition-all">
+          <option value="">⏱ Não definida</option>
+          <option value="30min">30 minutos</option>
+          <option value="1h">1 hora</option>
+          <option value="2h">2 horas</option>
+          <option value="3h">3 horas</option>
+          <option value="4h+">4 horas ou mais</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <p id="planModalErr"
+       class="hidden text-red-500 text-xs font-semibold mb-4 bg-red-50 dark:bg-red-900/20
+              px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50">
+    </p>
+
+    <!-- Footer buttons -->
     <div class="flex gap-3">
-      <button onclick="window.closeModals()" class="flex-1 py-3.5 rounded-2xl font-bold text-sm glass-subtle border text-slate-500 dark:text-slate-400 hover:opacity-80 transition">Cancelar</button>
-      <button onclick="window.savePlan()"    class="flex-[2] py-3.5 rounded-2xl font-extrabold text-sm text-white shadow-glow hover:-translate-y-0.5 transition" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Adicionar Plano</button>
+      <button id="planModalCancelBtn"
+              class="flex-1 py-3.5 rounded-2xl font-bold text-sm
+                     bg-slate-100 dark:bg-slate-700
+                     text-slate-500 dark:text-slate-300
+                     border border-slate-200 dark:border-slate-600
+                     hover:bg-slate-200 dark:hover:bg-slate-600
+                     transition-all active:scale-[.98]">
+        Cancelar
+      </button>
+      <button id="planModalSaveBtn"
+              class="flex-[2] py-3.5 rounded-2xl font-extrabold text-sm text-white
+                     hover:-translate-y-0.5 active:translate-y-0 active:scale-[.98]
+                     transition-all"
+              style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf);
+                     box-shadow:0 4px 20px rgba(46,90,158,.38)">
+        ✅ Adicionar Plano
+      </button>
     </div>
   </div>
 </div>
@@ -2006,16 +2130,57 @@ window.clearUserData = async () => {
 };
 
 // ── MODALS ──────────────────────────────────────────────────
-function openModal(id) { const m=$(id);m.classList.remove('hidden');m.classList.add('flex'); }
+function openModal(id) {
+  const m = $(id);
+  if (!m) return;
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+
+// Closes ALL modals in the system — single source of truth
+function closePlanModal() {
+  const m = $('planModal');
+  if (!m) return;
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+  // Clear inputs
+  const fields = ['mPlanSubj','mPlanTopic','mPlanDate','mPlanTime'];
+  fields.forEach(id => { const el=$(id); if(el) el.value=''; });
+  const prio = $('mPlanPrio'); if(prio) prio.value='Média';
+  const err  = $('planModalErr'); if(err) { err.textContent=''; err.classList.add('hidden'); }
+}
+
 window.closeModals = () => {
-  ['subModal','dlModal'].forEach(id=>{const m=$(id);m.classList.add('hidden');m.classList.remove('flex');});
+  // Close every modal
+  ['subModal','dlModal','planModal','planEditModal'].forEach(id => {
+    const m = $(id);
+    if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+  });
+  // Clear plan modal inputs specifically
+  const planFields = ['mPlanSubj','mPlanTopic','mPlanDate','mPlanTime'];
+  planFields.forEach(id => { const el=$(id); if(el) el.value=''; });
+  const prio = $('mPlanPrio'); if(prio) prio.value='Média';
+  const err  = $('planModalErr'); if(err) { err.textContent=''; err.classList.add('hidden'); }
 };
-document.querySelectorAll('#subModal,#dlModal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)window.closeModals();}));
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')window.closeModals();
-  if(e.key==='Enter'&&document.activeElement?.id==='taskInp')window.submitTask();
-  if(e.key==='Escape'&&$('quickAdd')?.style.display==='flex')window.cancelTask();
-  if(e.key==='Enter'&&document.activeElement?.id==='lPass')window.doLogin();
+
+// Wire planModal backdrop click, X button, Cancel button via event listeners
+// (done after DOM ready in boot section below)
+window.handlePlanModalBackdrop = (e) => {
+  if (e.target === $('planModal')) closePlanModal();
+};
+
+// Wire backdrop for legacy modals
+document.querySelectorAll('#subModal,#dlModal').forEach(m =>
+  m.addEventListener('click', e => { if(e.target===m) window.closeModals(); })
+);
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') window.closeModals();
+  if (e.key==='Enter' && document.activeElement?.id==='taskInp') window.submitTask();
+  if (e.key==='Escape' && $('quickAdd')?.style.display==='flex') window.cancelTask();
+  if (e.key==='Enter' && document.activeElement?.id==='lPass') window.doLogin();
+  // Enter in plan modal = save
+  if (e.key==='Enter' && !e.shiftKey && document.activeElement?.id==='mPlanSubj') window.savePlan();
 });
 
 // ── BOOT ─────────────────────────────────────────────────────
@@ -2122,32 +2287,92 @@ window.quickAddPlan = async () => {
   checkNotifications();
 };
 
-// ── Open full create modal ────────────────────
+// ── Open create modal — fully reset form ─────────────────────
 window.openPlanModal = () => {
-  ['mPlanSubj','mPlanTopic'].forEach(id => { const el=$(id); if(el) el.value=''; });
-  const de=$('mPlanDate'); if(de) de.value=new Date().toISOString().split('T')[0];
-  const pe=$('mPlanPrio'); if(pe) pe.value='Média';
-  const te=$('mPlanTime'); if(te) te.value='';
+  // Reset all fields
+  const clearIds = ['mPlanSubj','mPlanTopic'];
+  clearIds.forEach(id => { const el=$(id); if(el) el.value=''; });
+
+  // Set today as default date
+  const de = $('mPlanDate');
+  if (de) de.value = new Date().toISOString().split('T')[0];
+
+  const pe = $('mPlanPrio'); if(pe) pe.value = 'Média';
+  const te = $('mPlanTime'); if(te) te.value = '';
+
+  // Hide error
+  const err = $('planModalErr'); if(err) { err.textContent=''; err.classList.add('hidden'); }
+
   openModal('planModal');
+
+  // Focus first field after animation
+  setTimeout(() => { const f=$('mPlanSubj'); if(f) f.focus(); }, 80);
 };
 
-// ── Save (create) plan ────────────────────────
+// ── Save (create) plan ───────────────────────────────────────
+// Stores dateMs (epoch) alongside date string so the 3-day
+// notification check works reliably via simple number comparison.
+// Uses uid (module-scoped) — same as auth.currentUser.uid — via persist().
 window.savePlan = async () => {
-  const subj  = $('mPlanSubj')?.value.trim();
-  const topic = $('mPlanTopic')?.value.trim();
-  if (!subj || !topic) { alert('Disciplina e conteúdo são obrigatórios.'); return; }
+  const showErr = msg => {
+    const err = $('planModalErr');
+    if (err) { err.textContent = '⚠️ ' + msg; err.classList.remove('hidden'); }
+  };
+
+  const subj  = $('mPlanSubj')?.value.trim()  || '';
+  const topic = $('mPlanTopic')?.value.trim() || '';
+  const dateStr = $('mPlanDate')?.value || '';   // "YYYY-MM-DD"
+  const prio  = $('mPlanPrio')?.value  || 'Média';
+  const estTime = $('mPlanTime')?.value || '';
+
+  // ── Validation ──
+  if (!subj)  { showErr('O campo Disciplina é obrigatório.'); $('mPlanSubj')?.focus(); return; }
+  if (!topic) { showErr('Descreva o Conteúdo / Tópico a ser estudado.'); $('mPlanTopic')?.focus(); return; }
+
+  // ── Date handling ──
+  // Convert "YYYY-MM-DD" to epoch ms at end-of-day (23:59:59) in local time.
+  // This is what checkNotifications() compares against Date.now().
+  let dateMs = null;
+  if (dateStr) {
+    // Parse as LOCAL date (not UTC) to avoid timezone off-by-one issues
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const localDate = new Date(y, m-1, d, 23, 59, 59, 0);
+    dateMs = localDate.getTime();  // epoch milliseconds
+  }
+
+  // ── Build plan object ──
+  const plan = {
+    id:        Date.now(),           // unique numeric id
+    subj,
+    topic,
+    date:      dateStr,              // "YYYY-MM-DD" — for display & editing
+    dateMs,                          // epoch ms at 23:59 — for notification math
+    prio,
+    estTime,
+    status:    'pending',
+    done:      false,
+    notes:     '',
+    resources: [],
+    createdAt: new Date().toISOString(),
+    uid:       uid || null           // safety: store uid with the record
+  };
+
   if (!D.weekPlans) D.weekPlans = [];
-  D.weekPlans.push({
-    id: Date.now(), subj, topic,
-    date:    $('mPlanDate')?.value || '',
-    prio:    $('mPlanPrio')?.value || 'Média',
-    estTime: $('mPlanTime')?.value || '',
-    status:  'pending', done: false, notes: '', resources: [],
-    createdAt: new Date().toISOString()
-  });
-  await persist({ weekPlans: D.weekPlans });
-  closeModals(); renderSemanal();
-  toast('Plano adicionado! ☁️');
+  D.weekPlans.push(plan);
+
+  // ── Persist to Firestore (users/{uid}.weekPlans) ──
+  try {
+    await persist({ weekPlans: D.weekPlans });
+  } catch (err) {
+    showErr('Erro ao salvar no Firebase. Verifique a conexão.');
+    D.weekPlans.pop();  // rollback local state
+    return;
+  }
+
+  // ── Success ──
+  closePlanModal();
+  renderSemanal();
+  toast('✅ Plano adicionado e sincronizado! ☁️');
   checkNotifications();
 };
 
@@ -2401,8 +2626,12 @@ function renderPlanList(list) {
     const st=p.status||'pending';
     // Countdown
     let cd='',urg='';
-    if(p.date&&!p.done){
-      const diff=new Date(p.date+'T23:59')-now,days=Math.ceil(diff/86400000);
+    if(!p.done&&(p.dateMs||p.date)){
+      // Use dateMs if present (epoch ms), fallback to parsed string
+      const dlMs = p.dateMs
+        ? p.dateMs
+        : (() => { const [y,m,d]=(p.date||'').split('-').map(Number); return new Date(y,m-1,d,23,59,59).getTime(); })();
+      const diff=dlMs-now.getTime(),days=Math.ceil(diff/86400000);
       if(diff<=0)      {cd=`<span class="text-[10px] font-extrabold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-lg">Vencido</span>`;urg='status-urgent';}
       else if(days<=1) {cd=`<span class="text-[10px] font-extrabold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-lg">Hoje ⚠️</span>`;urg='status-urgent';}
       else if(days<=3) {cd=`<span class="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${days}d ⚠️</span>`;urg='status-urgent';}
@@ -2896,6 +3125,29 @@ const Onboarding = (() => {
   const dark=localStorage.getItem('hub_theme')==='dark'||(!localStorage.getItem('hub_theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
   syncThemeUI(dark);
   $('mDlDate').value=new Date().toISOString().split('T')[0];
+
+  // ── Wire planModal buttons ──────────────────────────────
+  // X close button
+  const closeBtn = $('planModalCloseBtn');
+  if (closeBtn) closeBtn.addEventListener('click', () => closePlanModal());
+
+  // Cancel button
+  const cancelBtn = $('planModalCancelBtn');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closePlanModal());
+
+  // Save button (Adicionar Plano)
+  const saveBtn = $('planModalSaveBtn');
+  if (saveBtn) saveBtn.addEventListener('click', () => window.savePlan());
+
+  // Backdrop click already handled by onclick="handlePlanModalBackdrop(event)" on the overlay
+
+  // ── Wire planEditModal close ────────────────────────────
+  const editModal = $('planEditModal');
+  if (editModal) {
+    editModal.addEventListener('click', e => {
+      if (e.target === editModal) window.closePlanEdit();
+    });
+  }
   // Activate default filter pill
   const fp=$('fp-all');
   if(fp) fp.classList.add('bg-gradient-to-r','from-ocean-700','to-ocean-600','text-white','border-ocean-700','shadow-glow-sm');
