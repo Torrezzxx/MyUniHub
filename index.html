@@ -681,45 +681,130 @@
 
 
       <!-- ════ PLANOS SEMANAIS (New) ════ -->
+      <!-- ══════ PLANOS SEMANAIS ══════ -->
       <div id="tab-semanal" class="tab-panel hidden">
+
+        <!-- ── Header ── -->
         <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
           <div>
             <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">Planos de Estudo Semanais</h1>
             <div id="semanalWeekLabel" class="text-sm text-slate-400 dark:text-slate-500 font-medium mt-0.5"></div>
           </div>
-          <button onclick="window.openPlanModal()" class="btn-action text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">+ Novo Plano</button>
-        </div>
-        <!-- Overview card -->
-        <div class="glass rounded-3xl p-5 shadow-soft mb-5">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight mb-0.5">Progresso da Semana</div>
-              <div class="text-xs text-slate-400 dark:text-slate-500 font-medium">Metas concluídas vs. planejadas</div>
+          <div class="flex gap-2 flex-wrap">
+            <!-- Week navigation -->
+            <div class="flex items-center glass rounded-2xl border border-white/30 dark:border-white/8 overflow-hidden shadow-soft-sm">
+              <button onclick="window.prevWeek()" class="px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-white/20 dark:hover:bg-white/6 transition text-base font-bold border-r border-white/20 dark:border-white/6">‹</button>
+              <span id="planWeekNav" class="px-3 text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Esta semana</span>
+              <button onclick="window.nextWeek()" id="planNextBtn" class="px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-white/20 dark:hover:bg-white/6 transition text-base font-bold border-l border-white/20 dark:border-white/6">›</button>
             </div>
-            <div class="flex items-center gap-5">
-              <div class="text-center">
-                <div id="planDoneCount" class="font-extrabold text-2xl text-emerald-500 tracking-tight">0</div>
-                <div class="text-[9px] font-black uppercase tracking-wider text-slate-400">Concluídas</div>
+            <button onclick="window.openPlanModal()" class="btn-action text-white text-sm font-bold px-5 py-2.5 rounded-2xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">+ Novo Plano</button>
+          </div>
+        </div>
+
+        <!-- ── Stats / Overview ── -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5" id="planStatsGrid">
+
+          <!-- Progress ring card -->
+          <div class="glass rounded-3xl p-5 shadow-soft col-span-1 flex items-center gap-5">
+            <div class="relative w-20 h-20 flex-shrink-0">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(46,90,158,.1)" stroke-width="8"/>
+                <circle id="planRing" cx="40" cy="40" r="34" fill="none" stroke="url(#planGrad)" stroke-width="8"
+                  stroke-dasharray="213.63" stroke-dashoffset="213.63" stroke-linecap="round"
+                  style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"/>
+                <defs>
+                  <linearGradient id="planGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#2E5A9E"/>
+                    <stop offset="100%" stop-color="#7c5cbf"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span id="planRingPct" class="font-extrabold text-sm text-ocean-700 dark:text-ocean-300 tracking-tight">0%</span>
               </div>
-              <div class="text-slate-200 dark:text-slate-600 text-2xl font-thin">/</div>
-              <div class="text-center">
-                <div id="planTotalCount" class="font-extrabold text-2xl text-ocean-700 dark:text-ocean-300 tracking-tight">0</div>
-                <div class="text-[9px] font-black uppercase tracking-wider text-slate-400">Total</div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight">Progresso Geral</div>
+              <div class="text-xs text-slate-400 font-medium mt-0.5">
+                <span id="planDoneCount" class="text-emerald-500 font-extrabold">0</span>
+                <span class="mx-1 text-slate-300 dark:text-slate-600">/</span>
+                <span id="planTotalCount" class="text-ocean-700 dark:text-ocean-300 font-extrabold">0</span>
+                <span class="ml-1">metas concluídas</span>
+              </div>
+              <div class="mt-2 h-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden w-full">
+                <div id="planFill" class="h-full rounded-full transition-all duration-700" style="width:0%;background:linear-gradient(90deg,#2E5A9E,#7c5cbf)"></div>
               </div>
             </div>
           </div>
-          <div class="mt-4 h-2.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
-            <div id="planFill" class="h-full rounded-full transition-all duration-700" style="width:0%;background:linear-gradient(90deg,#2E5A9E,#7c5cbf)"></div>
+
+          <!-- XP / streak card -->
+          <div class="glass rounded-3xl p-5 shadow-soft">
+            <div class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">🏆 Desempenho Semanal</div>
+            <div class="flex items-end gap-4">
+              <div>
+                <div id="planXP" class="font-extrabold text-3xl tracking-tight" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0 XP</div>
+                <div class="text-xs text-slate-400 font-medium mt-0.5">pontos ganhos</div>
+              </div>
+              <div id="planStreak" class="flex-1 text-right">
+                <div class="text-2xl font-extrabold text-amber-500" id="planStreakNum">0🔥</div>
+                <div class="text-xs text-slate-400 font-medium">dias seguidos</div>
+              </div>
+            </div>
+            <!-- XP bar -->
+            <div class="mt-3 h-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
+              <div id="planXpFill" class="h-full rounded-full transition-all duration-500" style="width:0%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div>
+            </div>
+            <div class="flex justify-between mt-1">
+              <span class="text-[9px] text-slate-400 font-semibold">0</span>
+              <span id="planXpNext" class="text-[9px] text-slate-400 font-semibold">Próximo nível: 100 XP</span>
+            </div>
+          </div>
+
+          <!-- Time estimate card -->
+          <div class="glass rounded-3xl p-5 shadow-soft">
+            <div class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">⏱ Carga Horária</div>
+            <div class="font-extrabold text-2xl text-ocean-700 dark:text-ocean-300 tracking-tight mb-0.5">
+              <span id="planTotalTime">—</span>
+            </div>
+            <div class="text-xs text-slate-400 font-medium mb-3">estimativa total restante</div>
+            <div id="planSubjPills" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
-        <!-- Filter bar -->
-        <div class="flex gap-2 flex-wrap mb-4">
-          <button onclick="window.filterPlans('all')"     id="pf-all"     class="pf-pill btn-action text-xs font-bold px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 glass-subtle text-slate-500 dark:text-slate-300 transition">📖 Todos</button>
-          <button onclick="window.filterPlans('pending')" id="pf-pending" class="pf-pill btn-action text-xs font-bold px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 glass-subtle text-slate-500 dark:text-slate-300 transition">⏳ Pendentes</button>
-          <button onclick="window.filterPlans('done')"    id="pf-done"    class="pf-pill btn-action text-xs font-bold px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 glass-subtle text-slate-500 dark:text-slate-300 transition">✅ Concluídos</button>
-          <button onclick="window.filterPlans('urgent')"  id="pf-urgent"  class="pf-pill btn-action text-xs font-bold px-4 py-2 rounded-2xl border border-red-300/50 dark:border-red-800/50 glass-subtle text-red-500 dark:text-red-400 transition">🔴 Urgentes</button>
+
+        <!-- ── View toggle + Filters ── -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <!-- Filters -->
+          <div class="flex gap-1.5 flex-wrap">
+            <button onclick="window.filterPlans('all')"     id="pf-all"     class="pf-pill text-xs font-bold px-3.5 py-1.5 rounded-xl border transition">📖 Todos</button>
+            <button onclick="window.filterPlans('pending')" id="pf-pending" class="pf-pill text-xs font-bold px-3.5 py-1.5 rounded-xl border transition">⏳ Pendentes</button>
+            <button onclick="window.filterPlans('doing')"   id="pf-doing"   class="pf-pill text-xs font-bold px-3.5 py-1.5 rounded-xl border transition">⚡ Em Andamento</button>
+            <button onclick="window.filterPlans('done')"    id="pf-done"    class="pf-pill text-xs font-bold px-3.5 py-1.5 rounded-xl border transition">✅ Concluídos</button>
+            <button onclick="window.filterPlans('urgent')"  id="pf-urgent"  class="pf-pill text-xs font-bold px-3.5 py-1.5 rounded-xl border border-red-200/60 dark:border-red-800/40 text-red-500 dark:text-red-400 transition">🔴 Urgentes</button>
+          </div>
+          <!-- View mode -->
+          <div class="flex glass rounded-2xl overflow-hidden border border-white/25 dark:border-white/7 shadow-soft-sm">
+            <button onclick="window.setPlanView('lista')"   id="pv-lista"   class="pv-btn px-3.5 py-2 text-xs font-bold transition text-slate-500 dark:text-slate-400">☰ Lista</button>
+            <button onclick="window.setPlanView('grupo')"   id="pv-grupo"   class="pv-btn px-3.5 py-2 text-xs font-bold transition text-slate-500 dark:text-slate-400 border-l border-white/20 dark:border-white/6">🗂 Por Matéria</button>
+            <button onclick="window.setPlanView('kanban')"  id="pv-kanban"  class="pv-btn px-3.5 py-2 text-xs font-bold transition text-slate-500 dark:text-slate-400 border-l border-white/20 dark:border-white/6">📋 Kanban</button>
+          </div>
         </div>
-        <div id="planList"></div>
+
+        <!-- ── Quick-add bar ── -->
+        <div id="quickPlanAdd" class="glass rounded-2xl border border-white/30 dark:border-white/8 p-3 mb-4 flex gap-2 items-center shadow-soft-sm">
+          <span class="text-lg flex-shrink-0">➕</span>
+          <input id="qpSubj" type="text" placeholder="Matéria (ex: Cálculo)" class="inp" style="flex:.8;min-width:0;padding:10px 14px;font-size:13px">
+          <input id="qpTopic" type="text" placeholder="Tópico a estudar…" class="inp" style="flex:1.6;min-width:0;padding:10px 14px;font-size:13px">
+          <select id="qpPrio" class="inp" style="flex:.5;min-width:80px;padding:10px 12px;font-size:12px">
+            <option value="Alta">🔴 Alta</option>
+            <option value="Média" selected>🟡 Média</option>
+            <option value="Baixa">🟢 Baixa</option>
+          </select>
+          <button onclick="window.quickAddPlan()" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl flex-shrink-0 shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Adicionar</button>
+        </div>
+
+        <!-- ── Content area (renders by view mode) ── -->
+        <div id="planContent"></div>
+
       </div>
 
       <!-- ════ PRAZOS ════ -->
@@ -941,6 +1026,79 @@
 ═══════════════════════════════════════════════════════════ -->
 
 <!-- Plan Modal -->
+
+<!-- Plan EDIT Modal -->
+<div id="planEditModal" class="fixed inset-0 z-[810] bg-black/55 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="modal-box glass rounded-4xl p-7 w-[520px] max-w-full max-h-[90vh] overflow-y-auto shadow-soft-lg" style="animation:scaleIn .22s ease">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-extrabold text-lg text-slate-800 dark:text-white tracking-tight">Editar Plano</h3>
+      <button onclick="window.closePlanEdit()" class="w-9 h-9 rounded-2xl glass-sm border text-slate-400 flex items-center justify-center text-sm hover:scale-110 transition">✕</button>
+    </div>
+    <input type="hidden" id="ePlanId">
+    <div class="space-y-4 mb-5">
+      <div><label class="lbl">Disciplina *</label><input id="ePlanSubj" type="text" placeholder="Ex: Cálculo I" class="inp"></div>
+      <div><label class="lbl">Conteúdo / Tópico *</label><textarea id="ePlanTopic" rows="3" class="inp resize-none" style="padding-top:12px"></textarea></div>
+      <div><label class="lbl">Anotações / Observações</label><textarea id="ePlanNotes" rows="3" placeholder="Links, páginas do livro, dúvidas…" class="inp resize-none" style="padding-top:12px"></textarea></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="lbl">Data Limite</label><input id="ePlanDate" type="date" class="inp"></div>
+        <div><label class="lbl">Prioridade</label>
+          <select id="ePlanPrio" class="inp">
+            <option value="Alta">🔴 Alta</option><option value="Média">🟡 Média</option><option value="Baixa">🟢 Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="lbl">Estimativa</label>
+          <select id="ePlanTime" class="inp">
+            <option value="">Não definida</option><option value="30min">30 min</option><option value="1h">1 hora</option><option value="2h">2 horas</option><option value="3h">3 horas</option><option value="4h+">4h+</option>
+          </select>
+        </div>
+        <div><label class="lbl">Status</label>
+          <select id="ePlanStatus" class="inp">
+            <option value="pending">⏳ Pendente</option><option value="doing">⚡ Em Andamento</option><option value="done">✅ Concluído</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="window.closePlanEdit()" class="flex-1 py-3.5 rounded-2xl font-bold text-sm glass-sm border text-slate-500 dark:text-slate-400 hover:opacity-80 transition">Cancelar</button>
+      <button onclick="window.saveEditPlan()"  class="flex-[2] py-3.5 rounded-2xl font-extrabold text-sm text-white shadow-glow hover:-translate-y-0.5 transition" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plan NOTES drawer (slide-up sheet) -->
+<div id="drawerBackdrop" class="drawer-backdrop" onclick="window.closeNotesDrawer()"></div>
+<div id="planNotesDrawer" class="fixed inset-x-0 bottom-0 z-[820] hidden" style="transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)">
+  <div class="glass rounded-t-4xl p-6 pb-10 shadow-soft-xl max-h-[70vh] overflow-y-auto border-t border-white/30 dark:border-white/8">
+    <div class="w-10 h-1 bg-slate-200 dark:bg-slate-600 rounded-full mx-auto mb-5"></div>
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <div id="drawerPlanTitle" class="font-extrabold text-slate-800 dark:text-white text-base tracking-tight"></div>
+        <div id="drawerPlanSubj"  class="text-sm text-slate-400 dark:text-slate-500 font-medium mt-0.5"></div>
+      </div>
+      <button onclick="window.closeNotesDrawer()" class="w-9 h-9 rounded-2xl glass-sm border text-slate-400 flex items-center justify-center text-sm hover:scale-110 transition">✕</button>
+    </div>
+    <!-- Notes textarea -->
+    <label class="lbl">📝 Anotações</label>
+    <textarea id="drawerNotes" rows="5" placeholder="Escreva suas anotações, links de referência, dúvidas para revisar…" class="inp resize-none mb-4" style="padding-top:12px"></textarea>
+    <!-- Resources list -->
+    <div class="flex items-center justify-between mb-2">
+      <label class="lbl mb-0">🔗 Recursos</label>
+      <button onclick="window.addResource()" class="text-xs font-bold text-ocean-700 dark:text-ocean-300 hover:opacity-70 transition">+ Adicionar</button>
+    </div>
+    <div id="resourceList" class="space-y-2 mb-5"></div>
+    <div id="resourceAddRow" class="hidden flex gap-2 mb-4">
+      <input id="resUrl" type="url" placeholder="https://…" class="inp flex-1" style="padding:10px 14px;font-size:13px">
+      <input id="resLabel" type="text" placeholder="Nome do link" class="inp" style="flex:.7;padding:10px 14px;font-size:13px">
+      <button onclick="window.saveResource()" class="btn-action text-white text-xs font-bold px-3 py-2.5 rounded-xl flex-shrink-0" style="background:#2E5A9E">OK</button>
+    </div>
+    <input type="hidden" id="drawerPlanId">
+    <button onclick="window.saveDrawer()" class="btn-action w-full py-3.5 rounded-2xl font-extrabold text-sm text-white shadow-glow" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">💾 Salvar Anotações</button>
+  </div>
+</div>
+
+
 <div id="planModal" class="fixed inset-0 z-[800] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
   <div class="modal-box bg-white dark:bg-slate-800 rounded-2xl p-7 w-[520px] max-w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 animate-[scaleIn_.22s_ease]">
     <div class="flex items-center justify-between mb-5">
@@ -1729,91 +1887,547 @@ document.addEventListener('keydown',e=>{
 // ── BOOT ─────────────────────────────────────────────────────
 
 /* ════════════════════════════════════════════
-   WEEKLY STUDY PLANS
+   PLANOS DE ESTUDO SEMANAIS  — v2 full rebuild
+   Features: week nav, view modes (list/group/kanban),
+   quick-add, edit, notes drawer, XP gamification,
+   subject color coding, status (pending/doing/done)
 ════════════════════════════════════════════ */
-function currentWeekLabel() {
+
+// ── State ────────────────────────────────────
+let planViewMode = 'lista';   // 'lista' | 'grupo' | 'kanban'
+let planWeekOffset = 0;       // 0 = current week, -1 = last week, etc.
+
+// ── Subject → color mapping (auto-assigned) ──
+const SUBJ_COLORS = ['#2E5A9E','#7c5cbf','#059669','#DC2626','#D97706','#DB2777','#0891B2','#EA580C','#84cc16','#06b6d4'];
+let _subjColorMap = {};
+function subjColor(name) {
+  if (!_subjColorMap[name]) {
+    const used = Object.keys(_subjColorMap).length;
+    _subjColorMap[name] = SUBJ_COLORS[used % SUBJ_COLORS.length];
+  }
+  return _subjColorMap[name];
+}
+function resetSubjColors() { _subjColorMap = {}; }
+
+// ── Week helpers ──────────────────────────────
+function getWeekBounds(offset = 0) {
   const now = new Date();
-  const mon = new Date(now); mon.setDate(now.getDate() - (now.getDay()===0?6:now.getDay()-1));
-  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
-  const fmt = d => d.toLocaleDateString('pt-BR',{day:'numeric',month:'short'});
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1) + offset * 7);
+  mon.setHours(0,0,0,0);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+  return { mon, sun };
+}
+
+function weekLabel(offset = 0) {
+  const { mon, sun } = getWeekBounds(offset);
+  const fmt = d => d.toLocaleDateString('pt-BR', { day:'numeric', month:'short' });
+  if (offset === 0) return `Esta semana · ${fmt(mon)} – ${fmt(sun)}`;
+  if (offset === -1) return `Semana passada · ${fmt(mon)} – ${fmt(sun)}`;
+  if (offset === 1)  return `Próxima semana · ${fmt(mon)} – ${fmt(sun)}`;
   return `Semana de ${fmt(mon)} até ${fmt(sun)}`;
 }
-window.openPlanModal = () => {
-  ['mPlanSubj','mPlanTopic'].forEach(id=>$(id).value='');
-  $('mPlanDate').value=new Date().toISOString().split('T')[0];
-  $('mPlanPrio').value='Média'; $('mPlanTime').value='';
-  openModal('planModal');
-};
-window.savePlan = async () => {
-  const subj=$('mPlanSubj').value.trim(),topic=$('mPlanTopic').value.trim();
-  if(!subj||!topic){alert('Disciplina e conteúdo são obrigatórios.');return;}
-  if(!D.weekPlans)D.weekPlans=[];
-  D.weekPlans.push({id:Date.now(),subj,topic,date:$('mPlanDate').value||'',prio:$('mPlanPrio').value,estTime:$('mPlanTime').value,done:false,createdAt:new Date().toISOString()});
-  await persist({weekPlans:D.weekPlans}); closeModals(); renderSemanal(); toast('Plano adicionado! ☁️'); checkNotifications();
-};
-window.togglePlan = async (id) => {
-  const p=(D.weekPlans||[]).find(x=>x.id===id);if(!p)return;
-  p.done=!p.done; await persist({weekPlans:D.weekPlans}); renderSemanal(); toast(p.done?'✅ Meta concluída!':'Meta reaberta.');
-};
-window.delPlan = async (id) => {
-  if(!confirm('Remover este plano?'))return;
-  D.weekPlans=D.weekPlans.filter(x=>x.id!==id);
-  await persist({weekPlans:D.weekPlans}); renderSemanal(); toast('Plano removido.'); checkNotifications();
-};
-window.filterPlans = (f) => {
-  planFilter=f;
-  document.querySelectorAll('.pf-pill').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor='';});
-  const pf=$('pf-'+f);
-  if(pf){pf.style.background='linear-gradient(135deg,#2E5A9E,#7c5cbf)';pf.style.color='white';pf.style.borderColor='#2E5A9E';}
+
+function plansForWeek(offset = 0) {
+  const { mon, sun } = getWeekBounds(offset);
+  const all = D.weekPlans || [];
+  // Plans with no date always shown in "current" week view
+  if (offset === 0) return all.filter(p => {
+    if (!p.date) return true;
+    const d = new Date(p.date + 'T12:00');
+    return d >= mon && d <= sun;
+  });
+  return all.filter(p => {
+    if (!p.date) return false;
+    const d = new Date(p.date + 'T12:00');
+    return d >= mon && d <= sun;
+  });
+}
+
+// ── Week navigation ───────────────────────────
+window.prevWeek = () => { planWeekOffset--; renderSemanal(); };
+window.nextWeek = () => {
+  if (planWeekOffset >= 0) return; // don't go past current week in next
+  planWeekOffset++;
   renderSemanal();
 };
+
+// ── View mode ─────────────────────────────────
+window.setPlanView = (mode) => {
+  planViewMode = mode;
+  document.querySelectorAll('.pv-btn').forEach(b => b.classList.remove('active'));
+  const btn = $('pv-' + mode); if (btn) btn.classList.add('active');
+  const cont = $('planContent'); if (cont) cont.style.animation = 'fadeUp .3s ease';
+  renderPlanContent(plansForWeek(planWeekOffset));
+};
+
+// ── Filter ────────────────────────────────────
+window.filterPlans = (f) => {
+  planFilter = f;
+  document.querySelectorAll('.pf-pill').forEach(b => b.classList.remove('active'));
+  const pf = $('pf-' + f); if (pf) pf.classList.add('active');
+  renderSemanal();
+};
+
+// ── Quick add ─────────────────────────────────
+window.quickAddPlan = async () => {
+  const subj  = $('qpSubj')?.value.trim();
+  const topic = $('qpTopic')?.value.trim();
+  const prio  = $('qpPrio')?.value || 'Média';
+  if (!subj || !topic) { toast('Preencha a matéria e o tópico.', true); return; }
+  if (!D.weekPlans) D.weekPlans = [];
+  D.weekPlans.push({
+    id: Date.now(), subj, topic, prio, date: '', estTime: '',
+    status: 'pending', done: false, notes: '', resources: [],
+    createdAt: new Date().toISOString()
+  });
+  $('qpSubj').value = ''; $('qpTopic').value = '';
+  await persist({ weekPlans: D.weekPlans });
+  renderSemanal();
+  toast('✅ Plano adicionado rapidamente! ☁️');
+  checkNotifications();
+};
+
+// ── Open full create modal ────────────────────
+window.openPlanModal = () => {
+  ['mPlanSubj','mPlanTopic'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  const de=$('mPlanDate'); if(de) de.value=new Date().toISOString().split('T')[0];
+  const pe=$('mPlanPrio'); if(pe) pe.value='Média';
+  const te=$('mPlanTime'); if(te) te.value='';
+  openModal('planModal');
+};
+
+// ── Save (create) plan ────────────────────────
+window.savePlan = async () => {
+  const subj  = $('mPlanSubj')?.value.trim();
+  const topic = $('mPlanTopic')?.value.trim();
+  if (!subj || !topic) { alert('Disciplina e conteúdo são obrigatórios.'); return; }
+  if (!D.weekPlans) D.weekPlans = [];
+  D.weekPlans.push({
+    id: Date.now(), subj, topic,
+    date:    $('mPlanDate')?.value || '',
+    prio:    $('mPlanPrio')?.value || 'Média',
+    estTime: $('mPlanTime')?.value || '',
+    status:  'pending', done: false, notes: '', resources: [],
+    createdAt: new Date().toISOString()
+  });
+  await persist({ weekPlans: D.weekPlans });
+  closeModals(); renderSemanal();
+  toast('Plano adicionado! ☁️');
+  checkNotifications();
+};
+
+// ── Toggle plan status (cycle: pending → doing → done → pending) ──
+window.togglePlan = async (id) => {
+  const p = (D.weekPlans || []).find(x => x.id === id); if (!p) return;
+  const cycle = { pending:'doing', doing:'done', done:'pending' };
+  p.status = cycle[p.status || 'pending'] || 'pending';
+  p.done   = p.status === 'done';
+  if (p.done) p.completedAt = new Date().toISOString();
+  else        delete p.completedAt;
+  await persist({ weekPlans: D.weekPlans });
+  renderSemanal();
+  if (p.done) {
+    toast('🎉 Meta concluída! +20 XP');
+    // Check if all plans for week are done → celebrate
+    const plans = plansForWeek(planWeekOffset);
+    if (plans.length > 0 && plans.every(x => x.done)) {
+      setTimeout(() => toast('🏆 Semana 100% concluída! Parabéns!'), 800);
+    }
+  }
+};
+
+// ── Delete plan ───────────────────────────────
+window.delPlan = async (id) => {
+  if (!confirm('Remover este plano permanentemente?')) return;
+  D.weekPlans = (D.weekPlans || []).filter(x => x.id !== id);
+  await persist({ weekPlans: D.weekPlans });
+  renderSemanal();
+  toast('Plano removido.');
+  checkNotifications();
+};
+
+// ── Edit modal ────────────────────────────────
+window.openEditPlan = (id) => {
+  const p = (D.weekPlans || []).find(x => x.id === id); if (!p) return;
+  $('ePlanId').value    = id;
+  $('ePlanSubj').value  = p.subj  || '';
+  $('ePlanTopic').value = p.topic || '';
+  $('ePlanNotes').value = p.notes || '';
+  $('ePlanDate').value  = p.date  || '';
+  $('ePlanPrio').value  = p.prio  || 'Média';
+  $('ePlanTime').value  = p.estTime || '';
+  $('ePlanStatus').value= p.status || 'pending';
+  const m = $('planEditModal'); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+};
+
+window.closePlanEdit = () => {
+  const m = $('planEditModal'); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+};
+
+window.saveEditPlan = async () => {
+  const id = parseInt($('ePlanId').value);
+  const p  = (D.weekPlans || []).find(x => x.id === id); if (!p) return;
+  p.subj    = $('ePlanSubj').value.trim();
+  p.topic   = $('ePlanTopic').value.trim();
+  p.notes   = $('ePlanNotes').value.trim();
+  p.date    = $('ePlanDate').value || '';
+  p.prio    = $('ePlanPrio').value;
+  p.estTime = $('ePlanTime').value;
+  p.status  = $('ePlanStatus').value;
+  p.done    = p.status === 'done';
+  if (!p.subj || !p.topic) { alert('Campos obrigatórios faltando.'); return; }
+  await persist({ weekPlans: D.weekPlans });
+  window.closePlanEdit();
+  renderSemanal();
+  toast('Plano atualizado! ☁️');
+};
+
+// ── Notes drawer ──────────────────────────────
+window.openNotesDrawer = (id) => {
+  const p = (D.weekPlans || []).find(x => x.id === id); if (!p) return;
+  $('drawerPlanId').value    = id;
+  $('drawerPlanTitle').textContent = p.topic || '';
+  $('drawerPlanSubj').textContent  = p.subj  || '';
+  $('drawerNotes').value     = p.notes || '';
+  renderResourceList(p.resources || []);
+  $('resourceAddRow').classList.add('hidden');
+
+  const bd = $('drawerBackdrop'); if(bd) bd.classList.add('open');
+  const dr = $('planNotesDrawer'); if(dr) { dr.classList.add('open'); dr.style.display='block'; }
+};
+
+window.closeNotesDrawer = () => {
+  const bd = $('drawerBackdrop'); if(bd) bd.classList.remove('open');
+  const dr = $('planNotesDrawer'); if(dr) dr.classList.remove('open');
+};
+
+function renderResourceList(resources) {
+  const el = $('resourceList'); if (!el) return;
+  if (!resources.length) { el.innerHTML = `<div class="text-xs text-slate-400 font-medium py-2">Nenhum recurso adicionado.</div>`; return; }
+  el.innerHTML = resources.map((r,i) => `
+    <div class="flex items-center gap-2 p-2.5 rounded-xl glass-sm border">
+      <span class="text-sm">🔗</span>
+      <a href="${r.url}" target="_blank" class="flex-1 text-xs font-semibold text-ocean-700 dark:text-ocean-300 hover:underline truncate">${r.label||r.url}</a>
+      <button onclick="window.removeResource(${i})" class="text-red-400 text-xs hover:text-red-600 transition">✕</button>
+    </div>`).join('');
+}
+
+window.addResource = () => { const r=$('resourceAddRow');if(r)r.classList.remove('hidden'); $('resUrl')?.focus(); };
+
+window.saveResource = () => {
+  const url   = $('resUrl')?.value.trim();
+  const label = $('resLabel')?.value.trim() || url;
+  if (!url) return;
+  const id = parseInt($('drawerPlanId').value);
+  const p  = (D.weekPlans||[]).find(x=>x.id===id); if(!p) return;
+  if (!p.resources) p.resources=[];
+  p.resources.push({ url, label });
+  renderResourceList(p.resources);
+  $('resUrl').value=''; $('resLabel').value='';
+  $('resourceAddRow').classList.add('hidden');
+};
+
+window.removeResource = (idx) => {
+  const id=(parseInt($('drawerPlanId').value));
+  const p=(D.weekPlans||[]).find(x=>x.id===id);if(!p||!p.resources)return;
+  p.resources.splice(idx,1); renderResourceList(p.resources);
+};
+
+window.saveDrawer = async () => {
+  const id = parseInt($('drawerPlanId').value);
+  const p  = (D.weekPlans||[]).find(x=>x.id===id); if(!p) return;
+  p.notes = $('drawerNotes').value.trim();
+  // resources already updated in-memory
+  await persist({ weekPlans: D.weekPlans });
+  window.closeNotesDrawer();
+  renderSemanal();
+  toast('Anotações salvas! ☁️');
+};
+
+// ── XP calculation ────────────────────────────
+function calcXP(plans) {
+  const XP_MAP = { done:20, doing:5 };
+  let xp = 0;
+  plans.forEach(p => { xp += XP_MAP[p.status||'pending'] || 0; });
+  // Bonus: all done
+  if (plans.length > 0 && plans.every(x=>x.done)) xp += 50;
+  return xp;
+}
+
+function calcStreak() {
+  // Count consecutive days with at least one done plan
+  let streak = 0, d = new Date();
+  for (let i=0; i<30; i++) {
+    const k = d.toISOString().split('T')[0];
+    const hasDone = (D.weekPlans||[]).some(p => p.completedAt && p.completedAt.startsWith(k));
+    if (hasDone) { streak++; d.setDate(d.getDate()-1); }
+    else if (i===0) { d.setDate(d.getDate()-1); } // allow today empty
+    else break;
+  }
+  return streak;
+}
+
+// ── Main render entry ─────────────────────────
 function renderSemanal() {
-  const wl=$('semanalWeekLabel'); if(wl) wl.textContent=currentWeekLabel();
-  const plans=D.weekPlans||[];
-  const done=plans.filter(p=>p.done).length, total=plans.length;
-  const dc=$('planDoneCount'),tc=$('planTotalCount'),pf=$('planFill');
-  if(dc)dc.textContent=done; if(tc)tc.textContent=total;
-  if(pf){const pct=total?Math.round((done/total)*100):0; pf.style.width=pct+'%'; pf.style.background=pct===100?'linear-gradient(90deg,#22c55e,#16a34a)':'linear-gradient(90deg,#2E5A9E,#7c5cbf)';}
-  const now=new Date(),THREE_DAYS=3*86400000;
-  let list=[...plans];
-  if(planFilter==='pending') list=list.filter(p=>!p.done);
+  // Week label
+  const wl = $('semanalWeekLabel'); if(wl) wl.textContent = weekLabel(planWeekOffset);
+  const nv = $('planWeekNav'); if(nv) nv.textContent = planWeekOffset===0?'Esta semana': planWeekOffset===-1?'Sem. passada': `${planWeekOffset < 0 ? planWeekOffset : '+'+planWeekOffset} sem.`;
+  const nb = $('planNextBtn'); if(nb) nb.style.opacity = planWeekOffset >= 0 ? '.3' : '1';
+
+  // Reset subject color map so colors are consistent per render
+  resetSubjColors();
+
+  const allPlans = plansForWeek(planWeekOffset);
+  const done  = allPlans.filter(p=>p.done).length;
+  const total = allPlans.length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+
+  // Update stat elements
+  const dc=$('planDoneCount'); if(dc) dc.textContent=done;
+  const tc=$('planTotalCount');if(tc) tc.textContent=total;
+  const pf=$('planFill');      if(pf){pf.style.width=pct+'%';pf.style.background=pct===100?'linear-gradient(90deg,#22c55e,#16a34a)':'linear-gradient(90deg,#2E5A9E,#7c5cbf)';}
+
+  // Ring
+  const ring=$('planRing');
+  if(ring){const circ=2*Math.PI*34;ring.style.strokeDashoffset=circ-(pct/100)*circ;}
+  const rp=$('planRingPct'); if(rp) rp.textContent=pct+'%';
+
+  // XP
+  const xp = calcXP(allPlans);
+  const xpEl=$('planXP'); if(xpEl)xpEl.textContent=xp+' XP';
+  const nextLevel=Math.ceil(xp/100)*100||100;
+  const xpPct=Math.min((xp%100),100);
+  const xf=$('planXpFill');if(xf)xf.style.width=xpPct+'%';
+  const xn=$('planXpNext');if(xn)xn.textContent=`Próximo nível: ${nextLevel} XP`;
+
+  // Streak
+  const streak=calcStreak();
+  const sn=$('planStreakNum');if(sn)sn.textContent=`${streak}🔥`;
+
+  // Time estimate remaining
+  const TIME_MAP={'30min':0.5,'1h':1,'2h':2,'3h':3,'4h+':4};
+  let totalH=0; allPlans.filter(p=>!p.done&&p.estTime).forEach(p=>totalH+=TIME_MAP[p.estTime]||0);
+  const tm=$('planTotalTime'); if(tm)tm.textContent=totalH===0?'—':`~${totalH}h restantes`;
+
+  // Subject pills (mini breakdown)
+  const groups={}; allPlans.forEach(p=>{if(!groups[p.subj])groups[p.subj]={total:0,done:0};groups[p.subj].total++;if(p.done)groups[p.subj].done++;});
+  const sp=$('planSubjPills');
+  if(sp) sp.innerHTML=Object.entries(groups).map(([s,g])=>`
+    <div class="flex items-center gap-1.5" title="${s}">
+      <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${subjColor(s)}"></div>
+      <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[80px]">${s}</span>
+      <span class="text-[10px] font-extrabold" style="color:${subjColor(s)}">${g.done}/${g.total}</span>
+    </div>`).join('');
+
+  // Filter plans
+  const now=new Date(),THREE=3*86400000;
+  let list=[...allPlans];
+  if(planFilter==='pending') list=list.filter(p=>p.status==='pending'||(!p.status&&!p.done));
+  if(planFilter==='doing')   list=list.filter(p=>p.status==='doing');
   if(planFilter==='done')    list=list.filter(p=>p.done);
-  if(planFilter==='urgent')  list=list.filter(p=>{if(p.done||!p.date)return false;const d=new Date(p.date+'T23:59')-now;return d>0&&d<=THREE_DAYS;});
-  list.sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return new Date(a.date)-new Date(b.date);});
-  const cont=$('planList'); if(!cont)return;
-  const P_C={Alta:'#ef4444',Média:'#f59e0b',Baixa:'#22c55e'};
+  if(planFilter==='urgent')  list=list.filter(p=>{
+    if(p.done||!p.date)return false;
+    const d=new Date(p.date+'T23:59')-now; return d>0&&d<=THREE;
+  });
+
+  renderPlanContent(list);
+}
+
+// ── Content renderer (dispatches to sub-renderers) ──
+function renderPlanContent(list) {
+  const cont=$('planContent'); if(!cont)return;
   if(!list.length){
-    const msgs={all:'Nenhum plano criado para esta semana.',pending:'Nenhuma meta pendente 🎉',done:'Nenhuma meta concluída ainda.',urgent:'Nenhuma meta urgente 🎉'};
-    cont.innerHTML=`<div class="text-center py-14 text-slate-400"><div class="text-4xl mb-3">📖</div><div class="font-bold text-slate-600 dark:text-slate-300 text-sm">${msgs[planFilter]||''}</div>${planFilter==='all'?`<div class="text-xs font-medium mt-1">Clique em <strong class="text-ocean-700 dark:text-ocean-300">+ Novo Plano</strong> para começar.</div>`:''}</div>`;
+    const MSGS={all:'Nenhum plano para esta semana.',pending:'Nenhuma meta pendente.',doing:'Nada em andamento.',done:'Nenhuma meta concluída ainda.',urgent:'Nenhum prazo urgente 🎉'};
+    cont.innerHTML=`<div class="text-center py-16 text-slate-400"><div class="text-5xl mb-4">📖</div><div class="font-bold text-slate-600 dark:text-slate-300 text-sm mb-1">${MSGS[planFilter]||'Nada aqui.'}</div>${planFilter==='all'?`<div class="text-xs font-medium">Use o campo acima ou <strong class="text-ocean-700 dark:text-ocean-300">+ Novo Plano</strong> para começar.</div>`:''}</div>`;
     return;
   }
-  cont.innerHTML=list.map(p=>{
-    const bColor=P_C[p.prio]||'#2E5A9E';
-    let countdown='',urgClass='';
+  if(planViewMode==='lista')  { cont.innerHTML=''; cont.appendChild(renderPlanList(list)); }
+  if(planViewMode==='grupo')  { cont.innerHTML=''; cont.appendChild(renderPlanGroup(list)); }
+  if(planViewMode==='kanban') { cont.innerHTML=''; cont.appendChild(renderPlanKanban(list)); }
+}
+
+// ── VIEW: Lista ───────────────────────────────
+function renderPlanList(list) {
+  const wrap=document.createElement('div');
+  const P_C={Alta:'#ef4444',Média:'#f59e0b',Baixa:'#22c55e'};
+  const now=new Date(),THREE=3*86400000;
+  // Sort: doing first, then pending, then done
+  const ORDER={doing:0,pending:1,done:2};
+  list=[...list].sort((a,b)=>{
+    const oa=ORDER[a.status||'pending']??1, ob=ORDER[b.status||'pending']??1;
+    if(oa!==ob)return oa-ob;
+    if(!a.date&&!b.date)return 0;
+    if(!a.date)return 1; if(!b.date)return -1;
+    return new Date(a.date)-new Date(b.date);
+  });
+  wrap.innerHTML=list.map(p=>{
+    const sc=subjColor(p.subj);
+    const pColor=P_C[p.prio]||'#2E5A9E';
+    const st=p.status||'pending';
+    // Countdown
+    let cd='',urg='';
     if(p.date&&!p.done){
       const diff=new Date(p.date+'T23:59')-now,days=Math.ceil(diff/86400000);
-      if(diff<=0)        {countdown=`<span class="text-red-500 font-extrabold text-xs">Vencido</span>`;urgClass='urgent-plan';}
-      else if(days<=1)   {countdown=`<span class="text-red-500 font-extrabold text-xs">Hoje! ⚠️</span>`;urgClass='urgent-plan';}
-      else if(days<=3)   {countdown=`<span class="text-amber-500 font-extrabold text-xs">${days}d ⚠️</span>`;urgClass='urgent-plan';}
-      else               {countdown=`<span class="text-slate-400 font-semibold text-xs">${days}d</span>`;}
+      if(diff<=0)      {cd=`<span class="text-[10px] font-extrabold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-lg">Vencido</span>`;urg='status-urgent';}
+      else if(days<=1) {cd=`<span class="text-[10px] font-extrabold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-lg">Hoje ⚠️</span>`;urg='status-urgent';}
+      else if(days<=3) {cd=`<span class="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${days}d ⚠️</span>`;urg='status-urgent';}
+      else             {cd=`<span class="text-[10px] font-semibold text-slate-400 px-2 py-0.5 rounded-lg">${days}d</span>`;}
     }
-    if(p.done) countdown=`<span class="text-emerald-500 font-extrabold text-xs">✅ Feito</span>`;
-    return `<div class="plan-card glass-subtle ${p.done?'done-plan':''} ${urgClass}" style="border-left-color:${bColor};background:${p.done?'rgba(236,253,245,.7)':'rgba(255,255,255,.6)'};border-radius:1.25rem;padding:16px 18px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;border-left:4px solid;transition:transform .18s ease,opacity .18s ease;">
-      <div onclick="window.togglePlan(${p.id})" class="w-5 h-5 rounded-lg flex-shrink-0 cursor-pointer flex items-center justify-center border-2 text-xs transition-all mt-0.5 ${p.done?'bg-emerald-500 border-emerald-500 text-white':'border-slate-300 dark:border-slate-600 bg-white/70 dark:bg-slate-900/60'}">${p.done?'✓':''}</div>
+    if(p.done) cd=`<span class="text-[10px] font-extrabold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg">✅ Feito</span>`;
+    // Status icon & style
+    const stIcon={pending:'⏳',doing:'⚡',done:'✓'}[st]||'⏳';
+    const stBg={pending:'rgba(255,255,255,.6)',doing:'rgba(246,243,255,.85)',done:'rgba(240,253,244,.85)'}[st];
+    const stBgD={pending:'rgba(15,23,42,.5)',doing:'rgba(35,15,60,.5)',done:'rgba(5,46,22,.45)'}[st];
+    const hasNotes=!!(p.notes||p.resources?.length);
+    return `<div class="pc2 glass-subtle ${urg} status-${st}" style="border-left-color:${sc};">
+      <!-- Status cycle button -->
+      <div onclick="window.togglePlan(${p.id})"
+        class="pc2-check mt-0.5 flex-shrink-0 text-xs"
+        title="Clique para avançar status: Pendente → Em andamento → Concluído"
+        style="border-color:${sc};background:${p.done?sc:'transparent'};color:${p.done?'#fff':sc}">
+        ${stIcon}
+      </div>
       <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-2 mb-1.5">
-          <div class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight ${p.done?'line-through opacity-50':''}">${p.subj}</div>
-          <div class="flex items-center gap-2 flex-shrink-0">${countdown}<button onclick="window.delPlan(${p.id})" class="bg-red-100 dark:bg-red-900/30 text-red-500 text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-red-200 transition">🗑</button></div>
+        <!-- Row 1: subject + actions -->
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${sc}"></div>
+            <span class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight ${p.done?'opacity-50':''} truncate">${p.subj}</span>
+            ${p.status==='doing'?`<span class="text-[9px] font-black px-2 py-0.5 rounded-full text-white" style="background:linear-gradient(135deg,#7c5cbf,#2E5A9E)">EM ANDAMENTO</span>`:''}
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            ${cd}
+            <button onclick="window.openNotesDrawer(${p.id})" title="${hasNotes?'Ver anotações':'Adicionar anotações'}" class="text-[11px] px-2 py-1 rounded-lg transition hover:opacity-70" style="background:${hasNotes?'rgba(46,90,158,.12)':'transparent'};color:${hasNotes?'#2E5A9E':'#94a3b8'}">
+              ${hasNotes?'📝':'📝'}${hasNotes?'·'+((p.resources||[]).length?p.resources.length+'🔗':''):''}
+            </button>
+            <button onclick="window.openEditPlan(${p.id})" title="Editar" class="text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 text-xs px-1.5 py-1 rounded-lg hover:bg-ocean-50 dark:hover:bg-ocean-900/20 transition">✏️</button>
+            <button onclick="window.delPlan(${p.id})" title="Remover" class="text-red-400 hover:text-red-600 text-xs px-1.5 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">🗑</button>
+          </div>
         </div>
-        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2 leading-relaxed ${p.done?'line-through opacity-50':''}">📝 ${p.topic}</div>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="glass-subtle border text-[10px] font-bold px-2 py-0.5 rounded-xl" style="color:${bColor}">${p.prio==='Alta'?'🔴':p.prio==='Média'?'🟡':'🟢'} ${p.prio}</span>
-          ${p.estTime?`<span class="glass-subtle border text-[10px] font-bold px-2 py-0.5 rounded-xl text-slate-500 dark:text-slate-400">⏱ ${p.estTime}</span>`:''}
-          ${p.date?`<span class="glass-subtle border text-[10px] font-bold px-2 py-0.5 rounded-xl text-slate-500 dark:text-slate-400">📅 ${new Date(p.date+'T12:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}</span>`:''}
+        <!-- Row 2: topic -->
+        <div class="text-xs font-medium mb-2 leading-relaxed ${p.done?'line-through opacity-40 text-slate-400':'text-slate-600 dark:text-slate-300'}">
+          ${p.topic}
+        </div>
+        <!-- Row 3: chips -->
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg" style="background:${pColor}22;color:${pColor}">
+            ${p.prio==='Alta'?'🔴':p.prio==='Média'?'🟡':'🟢'} ${p.prio}
+          </span>
+          ${p.estTime?`<span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-lg">⏱ ${p.estTime}</span>`:''}
+          ${p.date?`<span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-lg">📅 ${new Date(p.date+'T12:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}</span>`:''}
+          ${p.notes?`<span class="text-[10px] text-slate-400 italic truncate max-w-[120px]">"${p.notes.slice(0,40)}${p.notes.length>40?'…':''}"</span>`:''}
         </div>
       </div>
     </div>`;
   }).join('');
+  return wrap;
+}
+
+// ── VIEW: Por Matéria ─────────────────────────
+function renderPlanGroup(list) {
+  const wrap=document.createElement('div');
+  // Group by subject
+  const groups={};
+  list.forEach(p=>{if(!groups[p.subj])groups[p.subj]=[];groups[p.subj].push(p);});
+  const P_C={Alta:'#ef4444',Média:'#f59e0b',Baixa:'#22c55e'};
+  const now=new Date();
+  wrap.innerHTML=Object.entries(groups).map(([subj,plans])=>{
+    const sc=subjColor(subj);
+    const done=plans.filter(p=>p.done).length, total=plans.length;
+    const pct=Math.round((done/total)*100);
+    const items=plans.map(p=>{
+      const st=p.status||'pending';
+      const stIcon={pending:'⏳',doing:'⚡',done:'✓'}[st]||'⏳';
+      let cd='',urgent=false;
+      if(p.date&&!p.done){const diff=new Date(p.date+'T23:59')-now;if(diff<=3*86400000&&diff>0){cd=`<span style="color:#ef4444;font-size:10px;font-weight:700">${Math.ceil(diff/86400000)}d ⚠️</span>`;urgent=true;}}
+      if(p.done)cd=`<span style="color:#22c55e;font-size:10px;font-weight:700">✓ Feito</span>`;
+      return `<div class="flex items-start gap-3 py-3 border-b border-white/20 dark:border-white/5 last:border-0">
+        <div onclick="window.togglePlan(${p.id})" class="w-5 h-5 rounded-lg flex-shrink-0 cursor-pointer flex items-center justify-center border-2 text-xs mt-0.5 transition-all" style="border-color:${sc};background:${p.done?sc:'transparent'};color:${p.done?'#fff':sc}">${stIcon}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold ${p.done?'line-through opacity-40 text-slate-400':'text-slate-700 dark:text-slate-200'} leading-snug">${p.topic}</div>
+          <div class="flex gap-2 mt-1 flex-wrap items-center">
+            ${p.estTime?`<span style="font-size:10px;color:#94a3b8;font-weight:600">⏱ ${p.estTime}</span>`:''}
+            ${cd}
+            ${urgent&&!p.done?`<span style="font-size:10px;background:#fef3c7;color:#b45309;font-weight:700;padding:1px 6px;border-radius:6px">${P_C[p.prio]?p.prio:''}</span>`:''}
+          </div>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+          <button onclick="window.openEditPlan(${p.id})" class="text-slate-300 dark:text-slate-600 hover:text-ocean-700 dark:hover:text-ocean-300 text-xs transition px-1">✏️</button>
+          <button onclick="window.openNotesDrawer(${p.id})" class="text-slate-300 dark:text-slate-600 hover:text-ocean-700 dark:hover:text-ocean-300 text-xs transition px-1">📝</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="glass rounded-3xl shadow-soft mb-4 overflow-hidden">
+      <!-- Subject header -->
+      <div class="flex items-center justify-between px-5 py-4" style="border-left:4px solid ${sc}">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-extrabold" style="background:${sc}">${subj.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight">${subj}</div>
+            <div class="text-xs text-slate-400 font-medium mt-0.5">${done}/${total} metas concluídas</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="font-extrabold text-lg tracking-tight" style="color:${pct===100?'#22c55e':sc}">${pct}%</div>
+          </div>
+          <div class="h-8 w-8 relative">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="12" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="4"/>
+              <circle cx="16" cy="16" r="12" fill="none" stroke="${pct===100?'#22c55e':sc}" stroke-width="4"
+                stroke-dasharray="${2*Math.PI*12}" stroke-dashoffset="${2*Math.PI*12*(1-pct/100)}" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <!-- Progress micro-bar -->
+      <div class="h-1" style="background:${sc}22"><div style="height:100%;width:${pct}%;background:${sc};transition:width .6s ease"></div></div>
+      <!-- Items -->
+      <div class="px-5">${items}</div>
+    </div>`;
+  }).join('');
+  return wrap;
+}
+
+// ── VIEW: Kanban ──────────────────────────────
+function renderPlanKanban(list) {
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:14px;';
+  const cols={
+    pending:{label:'⏳ Pendente',bg:'rgba(241,245,249,.8)',bgD:'rgba(15,23,42,.5)',accent:'#94a3b8',plans:[]},
+    doing:  {label:'⚡ Em Andamento',bg:'rgba(245,243,255,.9)',bgD:'rgba(30,15,60,.5)',accent:'#7c5cbf',plans:[]},
+    done:   {label:'✅ Concluído',bg:'rgba(240,253,244,.9)',bgD:'rgba(5,46,22,.5)',accent:'#22c55e',plans:[]},
+  };
+  list.forEach(p=>{const s=p.status||'pending';(cols[s]||cols.pending).plans.push(p);});
+  const now=new Date();
+  wrap.innerHTML=Object.entries(cols).map(([key,col])=>{
+    const dark=document.documentElement.classList.contains('dark');
+    const cards=col.plans.map(p=>{
+      const sc=subjColor(p.subj);
+      let cd='';
+      if(p.date&&!p.done){const diff=new Date(p.date+'T23:59')-now,days=Math.ceil(diff/86400000);if(diff<=3*86400000&&diff>0)cd=`<div style="color:#ef4444;font-size:9px;font-weight:700;margin-top:4px">⚠️ ${days}d</div>`;}
+      return `<div class="kb-card glass-subtle" style="border-left-color:${sc};cursor:pointer" onclick="window.openEditPlan(${p.id})">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:${sc};margin-bottom:3px">${p.subj}</div>
+            <div style="font-size:12px;font-weight:600;color:${dark?'#e2e8f0':'#334155'};line-height:1.4">${p.topic.length>60?p.topic.slice(0,60)+'…':p.topic}</div>
+          </div>
+          <div onclick="event.stopPropagation();window.togglePlan(${p.id})"
+            style="width:18px;height:18px;border-radius:6px;border:2px solid ${sc};display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;cursor:pointer;background:${p.done?sc:'transparent'};color:${p.done?'#fff':sc}">
+            ${p.done?'✓':key==='doing'?'⚡':''}
+          </div>
+        </div>
+        ${p.estTime?`<div style="font-size:9px;color:#94a3b8;font-weight:600;margin-top:5px">⏱ ${p.estTime}</div>`:''}
+        ${cd}
+      </div>`;
+    }).join('');
+    return `<div class="kb-col" style="background:${dark?col.bgD:col.bg};border:1px solid ${col.accent}22">
+      <div class="kb-col-title" style="color:${col.accent}">${col.label} <span style="font-size:11px;background:${col.accent}22;padding:1px 6px;border-radius:8px">${col.plans.length}</span></div>
+      ${cards||`<div style="text-align:center;padding:20px 0;color:#94a3b8;font-size:12px;font-weight:500">Nenhuma tarefa</div>`}
+    </div>`;
+  }).join('');
+  return wrap;
 }
 
 (function boot() {
