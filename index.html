@@ -288,17 +288,9 @@
        ONBOARDING TUTORIAL SYSTEM
     ════════════════════════════════════════ */
     #obOverlay {
-  position:fixed;inset:0;z-index:9000;
-  pointer-events:none; /* Alterado de 'all' para 'none' */
-  opacity:0;           /* Garante que comece invisível */
-  transition:opacity .4s ease;
-}
-
-/* Adiciona esta nova regra para quando o tutorial for ativado */
-#obOverlay.active-ob { 
-  opacity:1;
-  pointer-events:all; 
-}
+      position:fixed;inset:0;z-index:9000;pointer-events:all;
+      transition:opacity .4s ease;
+    }
     #obOverlay.hidden-ob { opacity:0;pointer-events:none; }
     #obSpotlight {
       position:absolute;border-radius:22px;
@@ -1657,24 +1649,7 @@ function startListener() {
 }
 
 // ── SMART NOTIFICATIONS ──────────────────────────────────
-function checkNotifications() {
-  const now = new Date();
-  const urgent = D.deadlines.filter(d => {
-    if (d.completed) return false;
-    const dl = new Date(`${d.date}T${d.time||'23:59'}`);
-    const diff = dl - now;
-    return diff > 0 && diff <= 3 * 86400000; // ≤ 3 days
-  });
-  const banner = $('notifBanner');
-  if (!urgent.length) { banner.classList.add('hidden'); return; }
-  // Build message
-  const names = urgent.slice(0,2).map(d=>`"${d.title}"`).join(', ');
-  const extra  = urgent.length > 2 ? ` e mais ${urgent.length-2}` : '';
-  $('notifText').textContent = `⚠️ Atenção! ${names}${extra} vencem em 3 dias ou menos!`;
-  banner.classList.remove('hidden');
-  // Mobile: no sidebar offset
-  banner.style.marginLeft = window.innerWidth<=768 ? '0' : 'var(--sw)';
-}
+/* checkNotifications consolidated below */
 
 // ── THEME ────────────────────────────────────────────────
 function applyTheme(dark, animate=false) {
@@ -1962,6 +1937,8 @@ function renderChecklist() {
 
 // ── TODAY ─────────────────────────────────────────────────
 function renderToday() {
+  // Rest day guard — must be first (no infinite recursion, no override pattern)
+  if (typeof isRestDay === 'function' && isRestDay()) { _renderRestDay(); return; }
   const dayIdx=new Date().getDay();
   const subs=D.subjects.filter(s=>Number(s.day)===dayIdx).sort((a,b)=>a.start.localeCompare(b.start));
   const cont=$('todaySchedule');
@@ -3349,15 +3326,7 @@ function loadRestDayUI() {
   const sun = $('restSun'); if (sun) sun.checked = !!p.restSun;
 }
 
-/* Override renderToday to inject rest-day banner */
-const _origRenderToday = renderToday;
-function renderToday() {
-  if (isRestDay()) {
-    _renderRestDay();
-    return;
-  }
-  _origRenderToday();
-}
+/* renderToday override handled inline — see renderToday() definition */
 
 function _renderRestDay() {
   const name = (D.profile?.name || 'você').split(' ')[0];
@@ -3623,7 +3592,7 @@ const NOTIF_SESSION_KEY = 'hub_notif_shown';
 
 /* Original checkNotifications is already defined above.
    We patch it to gate on sessionStorage. */
-const _origCheckNotif = checkNotifications;
+// _origCheckNotif removed — checkNotifications is now a single function
 function checkNotifications() {
   // Call the original logic to compute urgency
   const now = new Date(), THREE_DAYS = 3 * 86400000;
