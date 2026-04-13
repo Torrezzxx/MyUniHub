@@ -401,6 +401,41 @@
     .pf-pill.active{background:linear-gradient(135deg,#2E5A9E,#7c5cbf)!important;color:white!important;border-color:#2E5A9E!important;}
     .pv-btn.active{background:linear-gradient(135deg,#2E5A9E,#7c5cbf);color:white;}
 
+
+    /* ── Rest Day Banner ── */
+    #restDayBanner {
+      background: linear-gradient(135deg, rgba(46,90,158,.08), rgba(124,92,191,.08));
+      border: 1px solid rgba(46,90,158,.15);
+      border-radius: 1.5rem;
+      padding: 32px 28px;
+      text-align: center;
+      animation: fadeUp .4s ease;
+    }
+    .dark #restDayBanner {
+      background: linear-gradient(135deg, rgba(46,90,158,.18), rgba(124,92,191,.15));
+      border-color: rgba(124,92,191,.25);
+    }
+
+    /* ── Book card ── */
+    .book-card {
+      border-radius: 1.25rem;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      animation: fadeUp .24s ease;
+      border-left: 4px solid;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .book-card:hover { transform: translateX(3px); }
+    .book-card.book-done { opacity: .55; }
+
+    /* Pages-per-day progress bar */
+    .ppd-bar { height: 6px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,.06); }
+    .dark .ppd-bar { background: rgba(255,255,255,.08); }
+    .ppd-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
   </style>
 </head>
 
@@ -614,6 +649,7 @@
       <button onclick="window.switchTab('calendario')" id="nav-calendario" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/50 hover:text-white/90 hover:bg-white/6 transition-all text-left">
         <span class="text-lg w-5 text-center flex-shrink-0">🗓️</span><span class="sb-label">Calendário</span>
       </button>
+      <button onclick="window.switchTab('biblioteca')" id="nav-biblioteca" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/50 hover:text-white/90 hover:bg-white/6 transition-all text-left"><span class="text-lg w-5 text-center flex-shrink-0">📚</span><span class="sb-label">Biblioteca</span></button>
       <button onclick="window.switchTab('progresso')"  id="nav-progresso"  class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/50 hover:text-white/90 hover:bg-white/6 transition-all text-left">
         <span class="text-lg w-5 text-center flex-shrink-0">📈</span><span class="sb-label">Progresso</span>
       </button>
@@ -1057,6 +1093,26 @@
               </div>
             </div>
 
+            <!-- 🛌 Rest days card -->
+            <div class="glass rounded-3xl p-5 shadow-soft">
+              <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight mb-1">🛌 Dias de Descanso</div>
+              <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mb-4 leading-relaxed">
+                Nos dias marcados, metas e cronômetro são desativados e uma mensagem motivadora é exibida.
+              </p>
+              <div class="space-y-3">
+                <label class="flex items-center justify-between p-3 glass-sm border rounded-2xl cursor-pointer hover:bg-white/10 dark:hover:bg-white/5 transition">
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">☀️ Sábado</span>
+                  <input type="checkbox" id="restSat" onchange="window.saveRestDays()"
+                    class="w-5 h-5 rounded-md accent-[#2E5A9E] cursor-pointer">
+                </label>
+                <label class="flex items-center justify-between p-3 glass-sm border rounded-2xl cursor-pointer hover:bg-white/10 dark:hover:bg-white/5 transition">
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">🌅 Domingo</span>
+                  <input type="checkbox" id="restSun" onchange="window.saveRestDays()"
+                    class="w-5 h-5 rounded-md accent-[#2E5A9E] cursor-pointer">
+                </label>
+              </div>
+            </div>
+
             <!-- Danger -->
             <div class="rounded-3xl p-5 border-2 border-red-200/60 dark:border-red-900/40" style="background:rgba(254,242,242,.6);" class="dark:bg-red-900/10">
               <div class="text-sm font-extrabold text-red-600 mb-1 tracking-tight">⚠️ Zona de Risco</div>
@@ -1065,6 +1121,41 @@
             </div>
           </div>
         </div>
+      </div>
+
+
+      <!-- ════ BIBLIOTECA VIRTUAL ════ -->
+      <div id="tab-biblioteca" class="tab-panel hidden">
+        <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">📚 Biblioteca Virtual</h1>
+            <div class="text-sm text-slate-400 dark:text-slate-500 font-medium mt-0.5">Gerencie seus livros e calcule a meta diária de páginas</div>
+          </div>
+          <button onclick="window.openBookModal()" class="btn-action text-white text-sm font-bold px-5 py-2.5 rounded-2xl shadow-glow-sm"
+            style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">+ Adicionar Livro</button>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" id="bookStats">
+          <div class="glass rounded-3xl p-5 shadow-soft text-center">
+            <div class="text-3xl mb-2">📖</div>
+            <div id="bookTotalCount" class="font-extrabold text-2xl text-ocean-700 dark:text-ocean-300 tracking-tight">0</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Livros na lista</div>
+          </div>
+          <div class="glass rounded-3xl p-5 shadow-soft text-center">
+            <div class="text-3xl mb-2">✅</div>
+            <div id="bookDoneCount" class="font-extrabold text-2xl text-emerald-500 tracking-tight">0</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Concluídos</div>
+          </div>
+          <div class="glass rounded-3xl p-5 shadow-soft text-center">
+            <div class="text-3xl mb-2">📄</div>
+            <div id="bookTodayPages" class="font-extrabold text-2xl text-amber-500 tracking-tight">0</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Páginas hoje (total)</div>
+          </div>
+        </div>
+
+        <!-- Book cards -->
+        <div id="bookList"></div>
       </div>
 
     </main>
@@ -1363,6 +1454,94 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════
+  MODAL: ADICIONAR LIVRO (Biblioteca Virtual)
+════════════════════════════════════════ -->
+<div id="bookModal"
+  class="fixed inset-0 z-[800] bg-black/55 backdrop-blur-md hidden items-center justify-center p-4"
+  onclick="window.handleBookModalBackdrop(event)">
+  <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,.22)]
+              border border-white/60 dark:border-slate-700
+              w-[480px] max-w-full max-h-[90vh] overflow-y-auto p-7 relative"
+       style="animation:scaleIn .24s cubic-bezier(.34,1.56,.64,1)">
+
+    <div class="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+         style="background:linear-gradient(90deg,#2E5A9E,#7c5cbf)"></div>
+
+    <div class="flex items-center justify-between mb-6 pt-1">
+      <div>
+        <h3 class="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight leading-none">📚 Novo Livro</h3>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">A meta de páginas/dia será calculada automaticamente</p>
+      </div>
+      <button id="bookModalCloseBtn"
+              class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300
+                     flex items-center justify-center text-base hover:bg-slate-200 dark:hover:bg-slate-600
+                     hover:text-slate-600 dark:hover:text-white transition-all hover:scale-105 active:scale-95">✕</button>
+    </div>
+
+    <div class="space-y-4 mb-5">
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Título do Livro <span class="text-red-400">*</span></label>
+        <input id="mBookTitle" type="text" placeholder="Ex: Clean Code, Sapiens, Dom Casmurro…"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Autor</label>
+        <input id="mBookAuthor" type="text" placeholder="Ex: Robert C. Martin"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total de Páginas <span class="text-red-400">*</span></label>
+          <input id="mBookPages" type="number" min="1" placeholder="Ex: 432"
+                 class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                        placeholder-slate-300 dark:placeholder-slate-600
+                        focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+        </div>
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Página Atual</label>
+          <input id="mBookCurrent" type="number" min="0" value="0" placeholder="0"
+                 class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                        placeholder-slate-300 dark:placeholder-slate-600
+                        focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Data Limite para Concluir</label>
+        <input id="mBookDeadline" type="date"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+    </div>
+
+    <p id="bookModalErr" class="hidden text-red-500 text-xs font-semibold mb-4 bg-red-50 dark:bg-red-900/20
+       px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50"></p>
+
+    <div class="flex gap-3">
+      <button id="bookModalCancelBtn"
+              class="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-slate-100 dark:bg-slate-700
+                     text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600
+                     hover:bg-slate-200 dark:hover:bg-slate-600 transition-all active:scale-[.98]">Cancelar</button>
+      <button id="bookModalSaveBtn"
+              class="flex-[2] py-3.5 rounded-2xl font-extrabold text-sm text-white
+                     hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf);box-shadow:0 4px 20px rgba(46,90,158,.38)">
+        📚 Adicionar à Biblioteca
+      </button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp }               from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged,
@@ -1463,7 +1642,8 @@ function startListener() {
       else { D.timer.seconds=D.timer.totalToday=D.timer.overtime=0; }
     }
     D.timer.date = today;
-    renderAll(); checkNotifications();
+    renderAll(); checkNotifications(); loadRestDayUI();
+    if (document.querySelector('#tab-biblioteca.active')) renderBiblioteca();
     showSync();
   }, err=>console.warn('Firestore:', err.code));
 }
@@ -1540,7 +1720,7 @@ window.doRegister = async () => {
     uid = cred.user.uid;
     await setDoc(uDoc(),{
       profile:{name,course:'',institution:'',semester:'1',goalMinutes:480,semStart:'',semEnd:''},
-      subjects:[],deadlines:[],weekPlans:[],
+      subjects:[],deadlines:[],weekPlans:[],books:[],
       checklist:{date:new Date().toDateString(),items:[]},
       studyHistory:{},
       timer:{date:new Date().toDateString(),totalToday:0,overtime:0},
@@ -2665,6 +2845,9 @@ function renderPlanList(list) {
               ${hasNotes?'📝':'📝'}${hasNotes?'·'+((p.resources||[]).length?p.resources.length+'🔗':''):''}
             </button>
             <button onclick="window.openEditPlan(${p.id})" title="Editar" class="text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 text-xs px-1.5 py-1 rounded-lg hover:bg-ocean-50 dark:hover:bg-ocean-900/20 transition">✏️</button>
+            ${!p.done ? `<button onclick="window.concludePlan(${p.id})" title="Marcar como Concluído"
+              class="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg
+                     bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">✅ Concluir</button>` : ''}
             <button onclick="window.delPlan(${p.id})" title="Remover" class="text-red-400 hover:text-red-600 text-xs px-1.5 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">🗑</button>
           </div>
         </div>
@@ -3121,6 +3304,367 @@ const Onboarding = (() => {
   return { start };
 })();
 
+
+/* ════════════════════════════════════════════════════════════
+   1. GESTÃO DE DESCANSO
+════════════════════════════════════════════════════════════ */
+function isRestDay() {
+  const dow = new Date().getDay(); // 0=Sun, 6=Sat
+  const p = D.profile || {};
+  if (dow === 6 && p.restSat) return true;
+  if (dow === 0 && p.restSun) return true;
+  return false;
+}
+
+function getRestMessage() {
+  const dow = new Date().getDay();
+  const msgs = {
+    0: ['🌅 Domingo é seu dia!',   'Descanse, recarregue as energias. Amanhã você estuda com ainda mais foco. 💪'],
+    6: ['☀️ Sábado de descanso!', 'Você merece uma pausa. Seu cérebro também precisa recuperar para absorver mais. 🧠'],
+  };
+  return msgs[dow] || ['🛌 Dia de Descanso', 'Aproveite o descanso — ele é parte do aprendizado!'];
+}
+
+window.saveRestDays = async () => {
+  if (!D.profile) D.profile = {};
+  D.profile.restSat = !!$('restSat')?.checked;
+  D.profile.restSun = !!$('restSun')?.checked;
+  await persist({ profile: D.profile });
+  updateTopBar();
+  renderToday();
+  toast('Dias de descanso salvos! ☁️');
+};
+
+function loadRestDayUI() {
+  const p = D.profile || {};
+  const sat = $('restSat'); if (sat) sat.checked = !!p.restSat;
+  const sun = $('restSun'); if (sun) sun.checked = !!p.restSun;
+}
+
+/* Override renderToday to inject rest-day banner */
+const _origRenderToday = renderToday;
+function renderToday() {
+  if (isRestDay()) {
+    _renderRestDay();
+    return;
+  }
+  _origRenderToday();
+}
+
+function _renderRestDay() {
+  const name = (D.profile?.name || 'você').split(' ')[0];
+  const [title, msg] = getRestMessage();
+  updateTopBar();
+
+  // Hide timer meta indicators
+  const ts = $('todaySchedule'); if (ts) ts.innerHTML = '';
+  const dn = $('todayDayName'); if (dn) dn.textContent = '';
+
+  // Replace checklist section with rest day banner
+  const cl = $('chkList');
+  if (cl) {
+    cl.innerHTML = `
+      <div id="restDayBanner" class="mt-2 mb-2">
+        <div style="font-size:56px;margin-bottom:12px;animation:obFloat 2.8s ease-in-out infinite">${title.slice(0,2)}</div>
+        <h2 class="font-extrabold text-xl text-slate-800 dark:text-white tracking-tight mb-2">${title.slice(2).trim()}, ${name}!</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">${msg}</p>
+        <div class="mt-5 inline-flex items-center gap-2 text-xs font-bold text-ocean-700 dark:text-ocean-300 bg-ocean-50 dark:bg-ocean-900/30 px-4 py-2 rounded-full border border-ocean-200 dark:border-ocean-800">
+          ⏰ Retorno amanhã · Você está no caminho certo!
+        </div>
+      </div>`;
+  }
+
+  // Dim timer ring
+  const ring = $('timerRing');
+  if (ring) ring.style.stroke = 'rgba(46,90,158,.2)';
+  const td = $('timerDigits');
+  if (td) td.style.color = 'rgba(46,90,158,.35)';
+
+  // Today schedule
+  const sched = $('todaySchedule');
+  if (sched) sched.innerHTML = `<div class="text-center py-6 text-slate-400 text-sm font-medium">Sem aulas programadas para hoje. 🌿</div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   2. PLAN CONCLUIR BUTTON — patch into renderPlanList
+   The existing togglePlan cycles pending→doing→done.
+   We expose a direct "mark as done" shortcut.
+════════════════════════════════════════════════════════════ */
+window.concludePlan = async (id) => {
+  const p = (D.weekPlans || []).find(x => x.id === id);
+  if (!p) return;
+  p.status = 'done';
+  p.done   = true;
+  p.completedAt = new Date().toISOString();
+  await persist({ weekPlans: D.weekPlans });
+  renderSemanal();
+  toast('🎉 Meta concluída! +20 XP');
+};
+
+/* ════════════════════════════════════════════════════════════
+   3. BIBLIOTECA VIRTUAL
+════════════════════════════════════════════════════════════ */
+if (!D.books) D.books = [];
+
+// Open book modal
+window.openBookModal = () => {
+  ['mBookTitle','mBookAuthor','mBookCurrent'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  const bp = $('mBookPages'); if(bp) bp.value='';
+  const bd = $('mBookDeadline'); if(bd) bd.value=new Date().toISOString().split('T')[0];
+  const err = $('bookModalErr'); if(err){ err.textContent=''; err.classList.add('hidden'); }
+  const m = $('bookModal'); if(m){ m.classList.remove('hidden'); m.classList.add('flex'); }
+  setTimeout(()=>{ const f=$('mBookTitle'); if(f)f.focus(); }, 80);
+};
+
+window.closeBookModal = () => {
+  const m = $('bookModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); }
+};
+
+window.handleBookModalBackdrop = (e) => {
+  if (e.target === $('bookModal')) window.closeBookModal();
+};
+
+// Calculate pages per day
+function calcPagesPerDay(totalPages, currentPage, deadlineDateStr) {
+  if (!deadlineDateStr) return null;
+  const remaining = Math.max(0, totalPages - (currentPage || 0));
+  if (remaining <= 0) return 0;
+  const [y,m,d] = deadlineDateStr.split('-').map(Number);
+  const deadline = new Date(y, m-1, d, 23, 59, 59);
+  const now = new Date();
+  // Days remaining including today
+  const msLeft  = deadline.getTime() - now.getTime();
+  const daysLeft = Math.max(1, Math.ceil(msLeft / 86400000));
+  return Math.ceil(remaining / daysLeft);
+}
+
+// Save book to Firestore
+window.saveBook = async () => {
+  const showErr = msg => {
+    const e = $('bookModalErr');
+    if (e) { e.textContent = '⚠️ ' + msg; e.classList.remove('hidden'); }
+  };
+  const title   = $('mBookTitle')?.value.trim()   || '';
+  const author  = $('mBookAuthor')?.value.trim()  || '';
+  const pages   = parseInt($('mBookPages')?.value) || 0;
+  const current = parseInt($('mBookCurrent')?.value) || 0;
+  const deadline= $('mBookDeadline')?.value        || '';
+
+  if (!title)       { showErr('O título é obrigatório.'); $('mBookTitle')?.focus(); return; }
+  if (pages < 1)    { showErr('Informe o total de páginas.'); $('mBookPages')?.focus(); return; }
+  if (current > pages){ showErr('Página atual não pode superar o total.'); return; }
+
+  // Compute dateMs for deadline notifications
+  let deadlineMs = null;
+  if (deadline) {
+    const [y,m,d] = deadline.split('-').map(Number);
+    deadlineMs = new Date(y, m-1, d, 23, 59, 59).getTime();
+  }
+
+  const ppd = calcPagesPerDay(pages, current, deadline);
+
+  const book = {
+    id:          Date.now(),
+    title,
+    author,
+    totalPages:  pages,
+    currentPage: current,
+    deadline,          // "YYYY-MM-DD"
+    deadlineMs,        // epoch ms for comparison
+    pagesPerDay: ppd,
+    done:        current >= pages,
+    createdAt:   new Date().toISOString(),
+    uid:         uid || null
+  };
+
+  if (!D.books) D.books = [];
+  D.books.push(book);
+
+  try {
+    await persist({ books: D.books });
+  } catch(err) {
+    showErr('Erro ao salvar no Firebase.'); D.books.pop(); return;
+  }
+
+  window.closeBookModal();
+  renderBiblioteca();
+  toast(`📚 "${title}" adicionado! Meta: ${ppd ?? '—'} páginas/dia ☁️`);
+};
+
+// Update current page
+window.updateBookPage = async (id) => {
+  const b = (D.books||[]).find(x=>x.id===id); if(!b) return;
+  const newPage = parseInt(prompt(`"${b.title}"\nEm qual página você está agora? (Total: ${b.totalPages})`, b.currentPage));
+  if (isNaN(newPage) || newPage < 0) return;
+  b.currentPage = Math.min(newPage, b.totalPages);
+  b.done = b.currentPage >= b.totalPages;
+  b.pagesPerDay = calcPagesPerDay(b.totalPages, b.currentPage, b.deadline);
+  await persist({ books: D.books });
+  renderBiblioteca();
+  toast(b.done ? '🎉 Livro concluído!' : `Progresso salvo! Meta: ${b.pagesPerDay ?? '—'} páginas/dia ☁️`);
+};
+
+// Delete book
+window.deleteBook = async (id) => {
+  if (!confirm('Remover este livro da biblioteca?')) return;
+  D.books = (D.books||[]).filter(x=>x.id!==id);
+  await persist({ books: D.books });
+  renderBiblioteca();
+  toast('Livro removido.');
+};
+
+// Render biblioteca tab
+function renderBiblioteca() {
+  const books = D.books || [];
+  const done  = books.filter(b=>b.done).length;
+  const todayPpd = books.filter(b=>!b.done && b.pagesPerDay > 0)
+                        .reduce((acc,b) => acc + (b.pagesPerDay||0), 0);
+
+  const tc = $('bookTotalCount'); if(tc) tc.textContent = books.length;
+  const dc = $('bookDoneCount');  if(dc) dc.textContent = done;
+  const tp = $('bookTodayPages');if(tp) tp.textContent = todayPpd || '—';
+
+  const cont = $('bookList'); if(!cont) return;
+
+  if (!books.length) {
+    cont.innerHTML = `<div class="text-center py-16 text-slate-400">
+      <div class="text-5xl mb-4">📚</div>
+      <div class="font-bold text-slate-600 dark:text-slate-300 text-sm mb-1">Nenhum livro ainda</div>
+      <div class="text-xs font-medium">Clique em <strong class="text-ocean-700 dark:text-ocean-300">+ Adicionar Livro</strong> para começar sua biblioteca.</div>
+    </div>`;
+    return;
+  }
+
+  const now = new Date();
+  cont.innerHTML = books.map(b => {
+    const pct = b.totalPages ? Math.min(Math.round((b.currentPage/b.totalPages)*100), 100) : 0;
+    const remaining = Math.max(0, b.totalPages - b.currentPage);
+
+    // Deadline countdown
+    let deadlineBadge = '';
+    if (b.deadline && !b.done) {
+      const dlMs = b.deadlineMs || (() => {
+        const [y,m,d]=b.deadline.split('-').map(Number);
+        return new Date(y,m-1,d,23,59,59).getTime();
+      })();
+      const diff  = dlMs - now.getTime();
+      const days  = Math.ceil(diff / 86400000);
+      if (diff <= 0)
+        deadlineBadge = `<span class="text-[10px] font-extrabold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-lg">Vencido</span>`;
+      else if (days <= 3)
+        deadlineBadge = `<span class="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${days}d ⚠️</span>`;
+      else
+        deadlineBadge = `<span class="text-[10px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-lg">📅 ${days}d</span>`;
+    }
+
+    const borderColor = b.done ? '#22c55e' : (pct > 60 ? '#2E5A9E' : '#7c5cbf');
+    const ppd = b.pagesPerDay;
+
+    return `<div class="book-card glass-subtle ${b.done?'book-done':''}" style="border-left-color:${borderColor}">
+      <!-- Icon -->
+      <div class="w-12 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl font-black text-white shadow-soft"
+           style="background:linear-gradient(135deg,${borderColor},${b.done?'#16a34a':'#7c5cbf'})">
+        ${b.done ? '✅' : '📖'}
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 min-w-0">
+        <!-- Title row -->
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <div class="min-w-0">
+            <div class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight ${b.done?'line-through opacity-60':''} truncate">${b.title}</div>
+            ${b.author ? `<div class="text-[11px] text-slate-400 font-medium mt-0.5">${b.author}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            ${deadlineBadge}
+            <button onclick="window.updateBookPage(${b.id})" title="Atualizar página atual"
+              class="text-[11px] font-bold text-ocean-700 dark:text-ocean-300 px-2 py-1 rounded-lg bg-ocean-50 dark:bg-ocean-900/30 hover:bg-ocean-100 dark:hover:bg-ocean-900/50 transition">✏️ pg</button>
+            <button onclick="window.deleteBook(${b.id})" title="Remover"
+              class="text-red-400 hover:text-red-600 text-xs px-1.5 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">🗑</button>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="flex items-center gap-2 mb-2">
+          <div class="flex-1 ppd-bar">
+            <div class="ppd-fill" style="width:${pct}%;background:linear-gradient(90deg,${borderColor},${b.done?'#22c55e':'#7c5cbf'})"></div>
+          </div>
+          <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">${pct}%</span>
+        </div>
+
+        <!-- Chips row -->
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-lg">
+            📄 ${b.currentPage} / ${b.totalPages} pág.
+          </span>
+          ${remaining > 0 ? `<span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-lg">${remaining} restantes</span>` : ''}
+          ${ppd != null && !b.done ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg" style="background:rgba(46,90,158,.1);color:#2E5A9E">
+            📊 ${ppd} pág/dia
+          </span>` : ''}
+          ${b.done ? `<span class="text-[10px] font-extrabold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg">✅ Concluído!</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. NOTIFICAÇÕES — sessionStorage (show only once per session)
+════════════════════════════════════════════════════════════ */
+const NOTIF_SESSION_KEY = 'hub_notif_shown';
+
+/* Original checkNotifications is already defined above.
+   We patch it to gate on sessionStorage. */
+const _origCheckNotif = checkNotifications;
+function checkNotifications() {
+  // Call the original logic to compute urgency
+  const now = new Date(), THREE_DAYS = 3 * 86400000;
+  const dlUrgent = (D.deadlines||[]).filter(d => {
+    if (d.completed) return false;
+    const diff = new Date(`${d.date}T${d.time||'23:59'}`) - now;
+    return diff > 0 && diff <= THREE_DAYS;
+  });
+  const planUrgent = (D.weekPlans||[]).filter(p => {
+    if (p.done) return false;
+    if (p.dateMs) { const diff=p.dateMs-now.getTime(); return diff>0&&diff<=THREE_DAYS; }
+    if (!p.date) return false;
+    const [y,m,d]=p.date.split('-').map(Number);
+    const dl=new Date(y,m-1,d,23,59,59).getTime();
+    return (dl-now.getTime())>0&&(dl-now.getTime())<=THREE_DAYS;
+  });
+  const bookUrgent = (D.books||[]).filter(b => {
+    if (b.done || !b.deadlineMs) return false;
+    const diff = b.deadlineMs - now.getTime();
+    return diff > 0 && diff <= THREE_DAYS;
+  });
+  const all = [...dlUrgent, ...planUrgent, ...bookUrgent];
+
+  const banner = $('notifBanner');
+  if (!banner) return;
+
+  if (!all.length) {
+    banner.classList.add('hidden');
+    // Reset session flag if no urgent items
+    sessionStorage.removeItem(NOTIF_SESSION_KEY);
+    return;
+  }
+
+  // Check if already shown this session
+  const todayKey = new Date().toISOString().split('T')[0];
+  const shown    = sessionStorage.getItem(NOTIF_SESSION_KEY);
+  if (shown === todayKey) return; // already shown today in this session
+
+  // Mark as shown
+  sessionStorage.setItem(NOTIF_SESSION_KEY, todayKey);
+
+  const names = all.slice(0,2).map(x=>`"${x.title||x.subj||'Item'}"`).join(', ');
+  const extra = all.length > 2 ? ` e mais ${all.length-2}` : '';
+  $('notifText').textContent = `⚠️ Atenção! ${names}${extra} vencem em 3 dias ou menos!`;
+  banner.classList.remove('hidden');
+  banner.style.marginLeft = window.innerWidth <= 768 ? '0' : 'var(--sw)';
+}
+
+
 (function boot() {
   const dark=localStorage.getItem('hub_theme')==='dark'||(!localStorage.getItem('hub_theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
   syncThemeUI(dark);
@@ -3148,6 +3692,14 @@ const Onboarding = (() => {
       if (e.target === editModal) window.closePlanEdit();
     });
   }
+
+  // ── Wire book modal buttons ──────────────────────────────
+  const bmClose  = $('bookModalCloseBtn');  if(bmClose)  bmClose.addEventListener('click',  () => window.closeBookModal());
+  const bmCancel = $('bookModalCancelBtn'); if(bmCancel) bmCancel.addEventListener('click', () => window.closeBookModal());
+  const bmSave   = $('bookModalSaveBtn');   if(bmSave)   bmSave.addEventListener('click',   () => window.saveBook());
+
+  // Ensure D.books is initialized
+  if (!D.books) D.books = [];
   // Activate default filter pill
   const fp=$('fp-all');
   if(fp) fp.classList.add('bg-gradient-to-r','from-ocean-700','to-ocean-600','text-white','border-ocean-700','shadow-glow-sm');
