@@ -288,9 +288,17 @@
        ONBOARDING TUTORIAL SYSTEM
     ════════════════════════════════════════ */
     #obOverlay {
-      position:fixed;inset:0;z-index:9000;pointer-events:all;
-      transition:opacity .4s ease;
-    }
+  position:fixed;inset:0;z-index:9000;
+  pointer-events:none; /* Alterado de 'all' para 'none' */
+  opacity:0;           /* Garante que comece invisível */
+  transition:opacity .4s ease;
+}
+
+/* Adiciona esta nova regra para quando o tutorial for ativado */
+#obOverlay.active-ob { 
+  opacity:1;
+  pointer-events:all; 
+}
     #obOverlay.hidden-ob { opacity:0;pointer-events:none; }
     #obSpotlight {
       position:absolute;border-radius:22px;
