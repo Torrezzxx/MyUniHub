@@ -578,7 +578,7 @@
         <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Instituição</label><input id="sInst" type="text" placeholder="Ex: USP, UNICAMP, PUC…" class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 font-medium"></div>
         <div><label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Semestre</label>
           <select id="sSem" class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white font-medium">
-            <option value="1">1º Semestre</option><option value="2">2º</option><option value="3">3º</option><option value="4">4º</option><option value="5">5º</option><option value="6">6º</option><option value="7">7º</option><option value="8">8º</option><option value="9">9º</option><option value="10">10º</option>
+            <option value="1">1º Semestre</option><option value="2">2º</option><option value="3">3º</option><option value="4">4º</option><option value="5">5º</option><option value="6">6º</option><option value="7">7º</option><option value="8">8º</option><option value="9">9º</option><option value="10">10º</option><option value="11">11º</option><option value="12">12º</option>
           </select>
         </div>
       </div>
@@ -1165,6 +1165,155 @@
 <!-- ═══════════════════════════════════════════════════════════
   MODALS
 ═══════════════════════════════════════════════════════════ -->
+
+<!-- ═════════════════════════════════════════
+  MODAL: EDITAR DISCIPLINA
+  Abre preenchido, salva via updateDoc (Firestore)
+════════════════════════════════════════════ -->
+<div id="editSubModal"
+  class="fixed inset-0 z-[810] hidden items-center justify-center p-4"
+  style="background:rgba(8,15,30,.65);backdrop-filter:blur(10px);"
+  onclick="window.handleEditSubBackdrop(event)">
+
+  <div class="bg-white/90 dark:bg-slate-800/95 rounded-3xl
+              border border-white/60 dark:border-slate-700
+              shadow-[0_28px_70px_rgba(0,0,0,.28)]
+              backdrop-blur-xl
+              w-[500px] max-w-full max-h-[92vh] overflow-y-auto p-7 relative"
+       style="animation:scaleIn .24s cubic-bezier(.34,1.56,.64,1)">
+
+    <!-- Decorative gradient bar -->
+    <div class="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+         style="background:linear-gradient(90deg,#2E5A9E,#7c5cbf)"></div>
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6 pt-1">
+      <div>
+        <h3 class="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight leading-none">
+          ✏️ Editar Disciplina
+        </h3>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">
+          As alterações são salvas em tempo real no Firebase ☁️
+        </p>
+      </div>
+      <button id="editSubCloseBtn"
+              class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-700
+                     text-slate-400 dark:text-slate-300
+                     flex items-center justify-center text-base
+                     hover:bg-slate-200 dark:hover:bg-slate-600
+                     hover:text-slate-600 dark:hover:text-white
+                     transition-all hover:scale-105 active:scale-95">✕</button>
+    </div>
+
+    <!-- Hidden id field -->
+    <input type="hidden" id="eSubId">
+
+    <!-- Form -->
+    <div class="space-y-4 mb-6">
+
+      <!-- Nome -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+          Nome da Disciplina <span class="text-red-400">*</span>
+        </label>
+        <input id="eSubName" type="text" placeholder="Ex: Cálculo I, Anatomia…"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70
+                      text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+
+      <!-- Professor -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+          Professor(a) <span class="text-red-400">*</span>
+        </label>
+        <input id="eSubProf" type="text" placeholder="Nome do professor"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70
+                      text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+
+      <!-- Dia + Início + Fim -->
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Dia</label>
+          <select id="eSubDay"
+                  class="w-full px-3 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                         bg-slate-50 dark:bg-slate-900/70
+                         text-sm font-medium text-slate-800 dark:text-white
+                         focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+            <option value="0">Dom</option><option value="1">Seg</option><option value="2">Ter</option>
+            <option value="3">Qua</option><option value="4">Qui</option><option value="5">Sex</option>
+            <option value="6">Sáb</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Início</label>
+          <input id="eSubStart" type="time" value="08:00"
+                 class="w-full px-3 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70
+                        text-sm font-medium text-slate-800 dark:text-white
+                        focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+        </div>
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Fim</label>
+          <input id="eSubEnd" type="time" value="10:00"
+                 class="w-full px-3 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70
+                        text-sm font-medium text-slate-800 dark:text-white
+                        focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+        </div>
+      </div>
+
+      <!-- Sala -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Sala / Local</label>
+        <input id="eSubRoom" type="text" placeholder="Ex: Sala 203, Lab B"
+               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                      bg-slate-50 dark:bg-slate-900/70
+                      text-sm font-medium text-slate-800 dark:text-white
+                      placeholder-slate-300 dark:placeholder-slate-600
+                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      </div>
+
+      <!-- Cor -->
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Cor da Disciplina</label>
+        <div id="editColorPicker" class="flex gap-2.5 flex-wrap"></div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <p id="editSubErr"
+       class="hidden text-red-500 text-xs font-semibold mb-4
+              bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-xl
+              border border-red-200 dark:border-red-800/50"></p>
+
+    <!-- Buttons -->
+    <div class="flex gap-3">
+      <button id="editSubCancelBtn"
+              class="flex-1 py-3.5 rounded-2xl font-bold text-sm
+                     bg-slate-100 dark:bg-slate-700
+                     text-slate-500 dark:text-slate-300
+                     border border-slate-200 dark:border-slate-600
+                     hover:bg-slate-200 dark:hover:bg-slate-600 transition-all active:scale-[.98]">
+        Cancelar
+      </button>
+      <button id="editSubSaveBtn"
+              class="flex-[2] py-3.5 rounded-2xl font-extrabold text-sm text-white
+                     hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf);
+                     box-shadow:0 4px 20px rgba(46,90,158,.38)">
+        💾 Salvar Alterações
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Disciplina -->
 <div id="subModal" class="fixed inset-0 z-[800] hidden items-center justify-center p-4" style="background:rgba(8,15,30,.6);backdrop-filter:blur(8px);">
   <div class="modal-panel glass rounded-4xl p-7 w-[500px] max-w-full max-h-[90vh] overflow-y-auto shadow-soft-xl border" style="animation:scaleIn .22s ease;">
@@ -2036,7 +2185,14 @@ function renderPlanos() {
           <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight truncate">${s.name}</div>
           <div class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">👤 ${s.prof}</div>
         </div>
-        <button onclick="window.delSub(${s.id})" class="btn-action bg-red-100 dark:bg-red-900/30 text-red-500 text-xs font-bold px-2.5 py-1.5 rounded-xl flex-shrink-0">🗑</button>
+        <div class="flex gap-1.5 flex-shrink-0">
+          <button onclick="window.openEditSub(${s.id})"
+                  title="Editar disciplina"
+                  class="btn-action bg-ocean-50 dark:bg-ocean-900/30 text-ocean-700 dark:text-ocean-300 text-xs font-bold px-2.5 py-1.5 rounded-xl hover:bg-ocean-100 dark:hover:bg-ocean-900/50 transition">✏️</button>
+          <button onclick="window.delSub(${s.id})"
+                  title="Remover disciplina"
+                  class="btn-action bg-red-100 dark:bg-red-900/30 text-red-500 text-xs font-bold px-2.5 py-1.5 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition">🗑</button>
+        </div>
       </div>
       <div class="flex gap-1.5 flex-wrap">
         <span class="glass-subtle border text-ocean-700 dark:text-ocean-300 text-[10px] font-bold px-2.5 py-1 rounded-xl">📅 ${DAYS[s.day]}</span>
@@ -2317,7 +2473,7 @@ function closePlanModal() {
 
 window.closeModals = () => {
   // Close every modal
-  ['subModal','dlModal','planModal','planEditModal'].forEach(id => {
+  ['subModal','dlModal','planModal','planEditModal','editSubModal'].forEach(id => {
     const m = $(id);
     if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
   });
@@ -3642,6 +3798,119 @@ function checkNotifications() {
 }
 
 
+
+/* ════════════════════════════════════════════════════════════
+   EDITAR DISCIPLINA
+   Opens modal pre-filled → updateDoc on Firestore → live re-render
+════════════════════════════════════════════════════════════ */
+let _editSubColor = '#2E5A9E';   // tracks selected color in edit modal
+
+window.openEditSub = (id) => {
+  const s = D.subjects.find(x => x.id === id);
+  if (!s) return;
+
+  // Populate hidden id
+  $('eSubId').value  = id;
+
+  // Populate text fields
+  $('eSubName').value  = s.name  || '';
+  $('eSubProf').value  = s.prof  || '';
+  $('eSubRoom').value  = s.room  || '';
+  $('eSubDay').value   = String(s.day  !== undefined ? s.day : 1);
+  $('eSubStart').value = s.start || '08:00';
+  $('eSubEnd').value   = s.end   || '10:00';
+
+  // Populate color picker
+  _editSubColor = s.color || COLORS[0];
+  $('editColorPicker').innerHTML = COLORS.map(c => `
+    <div onclick="window.pickEditColor('${c}',this)"
+         class="w-7 h-7 rounded-full cursor-pointer transition-all hover:scale-110 ${c === _editSubColor ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-125' : ''}"
+         style="background:${c}"></div>
+  `).join('');
+
+  // Clear error
+  const err = $('editSubErr');
+  if (err) { err.textContent = ''; err.classList.add('hidden'); }
+
+  // Show modal
+  const m = $('editSubModal');
+  if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+
+  // Auto-focus
+  setTimeout(() => $('eSubName')?.focus(), 80);
+};
+
+window.pickEditColor = (c, el) => {
+  _editSubColor = c;
+  document.querySelectorAll('#editColorPicker > div').forEach(e => {
+    e.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-400', 'dark:ring-slate-500', 'scale-125');
+  });
+  el.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400', 'scale-125');
+};
+
+window.closeEditSub = () => {
+  const m = $('editSubModal');
+  if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+};
+
+window.handleEditSubBackdrop = (e) => {
+  if (e.target === $('editSubModal')) window.closeEditSub();
+};
+
+window.saveEditSub = async () => {
+  const id   = parseInt($('eSubId').value);
+  const name = $('eSubName')?.value.trim() || '';
+  const prof = $('eSubProf')?.value.trim() || '';
+  const day  = parseInt($('eSubDay')?.value);
+  const start= $('eSubStart')?.value || '08:00';
+  const end  = $('eSubEnd')?.value   || '10:00';
+  const room = $('eSubRoom')?.value.trim() || '';
+
+  // ── Validation ──────────────────────────────────────
+  const showErr = msg => {
+    const e = $('editSubErr');
+    if (e) { e.textContent = '⚠️ ' + msg; e.classList.remove('hidden'); }
+  };
+  if (!name) { showErr('O nome da disciplina é obrigatório.'); $('eSubName')?.focus(); return; }
+  if (!prof) { showErr('O nome do professor é obrigatório.');  $('eSubProf')?.focus(); return; }
+  if (start >= end) { showErr('O horário de início deve ser anterior ao término.'); return; }
+
+  // ── Find and update in local state ──────────────────
+  const idx = D.subjects.findIndex(x => x.id === id);
+  if (idx === -1) { showErr('Disciplina não encontrada. Recarregue a página.'); return; }
+
+  // Merge changes (keep id + any other fields like createdAt)
+  D.subjects[idx] = {
+    ...D.subjects[idx],
+    name,
+    prof,
+    day,
+    start,
+    end,
+    room,
+    color: _editSubColor,
+    updatedAt: new Date().toISOString()
+  };
+
+  // ── Persist to Firestore via updateDoc ───────────────
+  // persist() calls updateDoc internally, merging only the subjects array.
+  // This updates the document without rewriting the entire user doc.
+  try {
+    await persist({ subjects: D.subjects });
+  } catch (err) {
+    // Rollback not needed as persist() is idempotent with Firestore listener
+    showErr('Erro ao salvar no Firebase. Verifique sua conexão.');
+    return;
+  }
+
+  // ── Close modal & refresh UI ─────────────────────────
+  window.closeEditSub();
+  renderPlanos();   // re-renders cards + grid + legend in real time
+  renderToday();    // refresh today's schedule (name/color may have changed)
+  toast(`✏️ "${name}" atualizado com sucesso! ☁️`);
+};
+
+
 (function boot() {
   const dark=localStorage.getItem('hub_theme')==='dark'||(!localStorage.getItem('hub_theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
   syncThemeUI(dark);
@@ -3671,6 +3940,11 @@ function checkNotifications() {
   }
 
   // ── Wire book modal buttons ──────────────────────────────
+  // ── Wire editSubModal buttons ───────────────────────────
+  const esClose  = $('editSubCloseBtn');  if(esClose)  esClose.addEventListener('click',  () => window.closeEditSub());
+  const esCancel = $('editSubCancelBtn'); if(esCancel) esCancel.addEventListener('click', () => window.closeEditSub());
+  const esSave   = $('editSubSaveBtn');   if(esSave)   esSave.addEventListener('click',   () => window.saveEditSub());
+
   const bmClose  = $('bookModalCloseBtn');  if(bmClose)  bmClose.addEventListener('click',  () => window.closeBookModal());
   const bmCancel = $('bookModalCancelBtn'); if(bmCancel) bmCancel.addEventListener('click', () => window.closeBookModal());
   const bmSave   = $('bookModalSaveBtn');   if(bmSave)   bmSave.addEventListener('click',   () => window.saveBook());
