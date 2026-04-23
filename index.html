@@ -436,6 +436,55 @@
     .dark .ppd-bar { background: rgba(255,255,255,.08); }
     .ppd-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
 
+
+    /* ── Google Books Autocomplete ── */
+    #bookAcDropdown.open   { display: block; animation: fadeUp .18s ease; }
+    #bookAcDropdown:not(.open) { display: none; }
+
+    .book-ac-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px; cursor: pointer;
+      transition: background .14s;
+      border-bottom: 1px solid rgba(0,0,0,.04);
+    }
+    .book-ac-item:last-child { border-bottom: none; }
+    .book-ac-item:hover, .book-ac-item.active {
+      background: rgba(46,90,158,.07);
+    }
+    .dark-ac .book-ac-item:hover,
+    .dark-ac .book-ac-item.active {
+      background: rgba(46,90,158,.18);
+    }
+    .book-ac-cover {
+      width: 34px; height: 46px; border-radius: 5px;
+      object-fit: cover; flex-shrink: 0;
+      background: linear-gradient(135deg,#2E5A9E22,#7c5cbf22);
+      border: 1px solid rgba(0,0,0,.08);
+    }
+    .book-ac-cover-placeholder {
+      width: 34px; height: 46px; border-radius: 5px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      background: linear-gradient(135deg,rgba(46,90,158,.1),rgba(124,92,191,.1));
+      border: 1px solid rgba(46,90,158,.15);
+    }
+    .book-ac-title {
+      font-size: 13px; font-weight: 700; color: #1e293b;
+      line-height: 1.3; margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .book-ac-author {
+      font-size: 11px; font-weight: 500; color: #64748b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .book-ac-meta {
+      font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 2px;
+    }
+    .book-ac-empty {
+      padding: 18px 16px; text-align: center;
+      font-size: 12px; font-weight: 500; color: #94a3b8;
+    }
+
   </style>
 </head>
 
@@ -1630,13 +1679,53 @@
     </div>
 
     <div class="space-y-4 mb-5">
-      <div>
-        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Título do Livro <span class="text-red-400">*</span></label>
-        <input id="mBookTitle" type="text" placeholder="Ex: Clean Code, Sapiens, Dom Casmurro…"
-               class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
-                      bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
-                      placeholder-slate-300 dark:placeholder-slate-600
-                      focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10 transition-all">
+      <!-- ── Book Title with Google Books Autocomplete ── -->
+      <div class="relative" id="bookAcWrapper">
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          Título do Livro <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <input id="mBookTitle"
+                 type="text"
+                 placeholder="Digite para buscar na Google Books…"
+                 autocomplete="off"
+                 spellcheck="false"
+                 class="w-full pl-4 pr-10 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600
+                        bg-slate-50 dark:bg-slate-900/70 text-sm font-medium text-slate-800 dark:text-white
+                        placeholder-slate-300 dark:placeholder-slate-600
+                        focus:border-[#2E5A9E] focus:outline-none focus:ring-4 focus:ring-[#2E5A9E]/10
+                        transition-all">
+          <!-- Search spinner / clear icon -->
+          <div id="bookAcStatus" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center pointer-events-none">
+            <svg id="bookAcSpinner" class="hidden w-4 h-4 text-ocean-700 dark:text-ocean-300 animate-spin"
+                 viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+            </svg>
+            <span id="bookAcIco" class="text-slate-300 dark:text-slate-600 text-sm select-none">🔍</span>
+          </div>
+        </div>
+
+        <!-- Dropdown suggestions -->
+        <div id="bookAcDropdown"
+             class="hidden absolute left-0 right-0 top-full mt-1.5 z-[50]
+                    rounded-2xl overflow-hidden
+                    shadow-[0_16px_48px_rgba(0,0,0,.18)]"
+             style="background:rgba(255,255,255,.96);
+                    backdrop-filter:blur(18px) saturate(180%);
+                    -webkit-backdrop-filter:blur(18px) saturate(180%);
+                    border:1px solid rgba(255,255,255,.5);">
+          <!-- dark override via inline JS since Tailwind dark: wont apply on dynamic div -->
+          <div id="bookAcList" class="max-h-72 overflow-y-auto py-1.5"></div>
+          <div id="bookAcFooter"
+               class="px-4 py-2 border-t flex items-center gap-1.5"
+               style="border-color:rgba(0,0,0,.06)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" class="flex-shrink-0">
+              <path d="M21.35 11.1h-9.17v2.73h5.51c-.33 2.15-2.18 3.48-5.51 3.48-3.35 0-6.08-2.77-6.08-6.18s2.73-6.18 6.08-6.18c1.66 0 3.13.61 4.27 1.61l2.08-2.08C16.94 3.29 14.87 2.5 12.18 2.5 6.9 2.5 2.5 6.9 2.5 12.18c0 5.28 4.4 9.68 9.68 9.68 5.61 0 9.32-3.93 9.32-9.48 0-.62-.07-1.3-.15-1.88z" fill="#4285F4"/>
+            </svg>
+            <span class="text-[10px] font-semibold text-slate-400">Resultados via Google Books API</span>
+          </div>
+        </div>
       </div>
       <div>
         <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Autor</label>
@@ -3545,6 +3634,8 @@ window.openBookModal = () => {
   const bp = $('mBookPages'); if(bp) bp.value='';
   const bd = $('mBookDeadline'); if(bd) bd.value=new Date().toISOString().split('T')[0];
   const err = $('bookModalErr'); if(err){ err.textContent=''; err.classList.add('hidden'); }
+  // Reset title field border (may have green highlight from previous selection)
+  const tf = $('mBookTitle'); if(tf){ tf.style.borderColor=''; tf.style.boxShadow=''; }
   const m = $('bookModal'); if(m){ m.classList.remove('hidden'); m.classList.add('flex'); }
   setTimeout(()=>{ const f=$('mBookTitle'); if(f)f.focus(); }, 80);
 };
@@ -3909,6 +4000,255 @@ window.saveEditSub = async () => {
   renderToday();    // refresh today's schedule (name/color may have changed)
   toast(`✏️ "${name}" atualizado com sucesso! ☁️`);
 };
+
+
+
+/* ════════════════════════════════════════════════════════════
+   GOOGLE BOOKS AUTOCOMPLETE
+   - Debounce 300 ms, min 3 chars
+   - Fetches: title, authors, pageCount, thumbnail
+   - On select: fills mBookTitle, mBookAuthor, mBookPages
+   - Keyboard navigation: ↑ ↓ Enter Escape
+════════════════════════════════════════════════════════════ */
+(function initBookAutocomplete() {
+  // Guard — runs once when the module loads
+  // The input doesn't exist until the modal is opened, so we
+  // use event delegation on document for robustness.
+
+  let _debounceTimer = null;
+  let _activeIndex   = -1;
+  let _results       = [];       // current suggestion list
+  let _lastQuery     = '';
+  const GBAPI = 'https://www.googleapis.com/books/v1/volumes';
+  const MIN_CHARS = 3;
+  const DEBOUNCE  = 300;
+
+  // ── Helpers ──────────────────────────────────────────────
+  function $ac(id) { return document.getElementById(id); }
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+
+  function showSpinner(on) {
+    const sp  = $ac('bookAcSpinner');
+    const ico = $ac('bookAcIco');
+    if (!sp || !ico) return;
+    sp.classList.toggle('hidden', !on);
+    ico.classList.toggle('hidden',  on);
+  }
+
+  function openDropdown() {
+    const dd = $ac('bookAcDropdown');
+    if (!dd) return;
+    dd.classList.add('open');
+    // Apply dark mode styling
+    if (isDark()) {
+      dd.style.background = 'rgba(15,23,42,.96)';
+      dd.style.borderColor = 'rgba(255,255,255,.09)';
+      dd.classList.add('dark-ac');
+    } else {
+      dd.style.background = 'rgba(255,255,255,.96)';
+      dd.style.borderColor = 'rgba(255,255,255,.5)';
+      dd.classList.remove('dark-ac');
+    }
+    // Footer border
+    const footer = $ac('bookAcFooter');
+    if (footer) footer.style.borderColor = isDark() ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+  }
+
+  function closeDropdown() {
+    const dd = $ac('bookAcDropdown');
+    if (dd) dd.classList.remove('open');
+    _activeIndex = -1;
+  }
+
+  // ── Render suggestions ───────────────────────────────────
+  function renderSuggestions(items) {
+    const list = $ac('bookAcList');
+    if (!list) return;
+    _results = items;
+    _activeIndex = -1;
+
+    if (!items.length) {
+      list.innerHTML = `<div class="book-ac-empty">Nenhum resultado encontrado para "${_lastQuery}"</div>`;
+      openDropdown();
+      return;
+    }
+
+    list.innerHTML = items.map((book, i) => {
+      const vol   = book.volumeInfo || {};
+      const title = vol.title || '(sem título)';
+      const auth  = (vol.authors || []).join(', ') || 'Autor desconhecido';
+      const pages = vol.pageCount ? `${vol.pageCount} pág.` : '';
+      const year  = vol.publishedDate ? vol.publishedDate.slice(0,4) : '';
+      const thumb = vol.imageLinks?.smallThumbnail || vol.imageLinks?.thumbnail || '';
+      const meta  = [year, pages].filter(Boolean).join(' · ');
+
+      const coverHTML = thumb
+        ? `<img class="book-ac-cover" src="${thumb.replace('http:','https:')}" alt="" loading="lazy">`
+        : `<div class="book-ac-cover-placeholder">📖</div>`;
+
+      const titleHighlight = title.replace(
+        new RegExp(`(${_lastQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),
+        `<mark style="background:rgba(46,90,158,.15);color:inherit;border-radius:3px;padding:0 2px">$1</mark>`
+      );
+
+      const darkTitle  = isDark() ? '#f1f5f9' : '#1e293b';
+      const darkAuthor = isDark() ? '#94a3b8' : '#64748b';
+
+      return `<div class="book-ac-item" data-index="${i}"
+                   onmouseenter="window._bookAcHover(${i})"
+                   onmousedown="window._bookAcSelect(${i})">
+        ${coverHTML}
+        <div style="min-width:0;flex:1">
+          <div class="book-ac-title" style="color:${darkTitle}">${titleHighlight}</div>
+          <div class="book-ac-author" style="color:${darkAuthor}">${auth}</div>
+          ${meta ? `<div class="book-ac-meta">${meta}</div>` : ''}
+        </div>
+        ${vol.pageCount ? `<div style="font-size:10px;font-weight:700;color:#2E5A9E;flex-shrink:0;white-space:nowrap">${vol.pageCount}<br><span style="font-weight:500;color:${darkAuthor}">pág.</span></div>` : ''}
+      </div>`;
+    }).join('');
+
+    openDropdown();
+  }
+
+  // ── Keyboard active highlight ─────────────────────────────
+  function highlightItem(idx) {
+    const items = ($ac('bookAcList') || {}).querySelectorAll?.('.book-ac-item') || [];
+    items.forEach((el, i) => el.classList.toggle('active', i === idx));
+    if (items[idx]) items[idx].scrollIntoView({ block:'nearest' });
+  }
+
+  // ── Select a suggestion ───────────────────────────────────
+  window._bookAcSelect = (idx) => {
+    const book = _results[idx];
+    if (!book) return;
+    const vol   = book.volumeInfo || {};
+    const title = vol.title || '';
+    const auth  = (vol.authors || []).join(', ') || '';
+    const pages = vol.pageCount || '';
+
+    const titleEl  = $ac('mBookTitle');
+    const authorEl = $ac('mBookAuthor');
+    const pagesEl  = $ac('mBookPages');
+
+    if (titleEl)  { titleEl.value  = title; titleEl.dispatchEvent(new Event('input')); }
+    if (authorEl && auth)  authorEl.value  = auth;
+    if (pagesEl  && pages) pagesEl.value   = String(pages);
+
+    closeDropdown();
+
+    // Visual feedback: briefly highlight the input
+    if (titleEl) {
+      titleEl.style.borderColor = '#22c55e';
+      titleEl.style.boxShadow   = '0 0 0 4px rgba(34,197,94,.12)';
+      setTimeout(() => {
+        titleEl.style.borderColor = '';
+        titleEl.style.boxShadow   = '';
+      }, 1200);
+    }
+
+    // Focus pages if empty, otherwise author
+    setTimeout(() => {
+      if (pagesEl && !pagesEl.value) { pagesEl.focus(); return; }
+      if (authorEl && !authorEl.value) { authorEl.focus(); return; }
+    }, 80);
+  };
+
+  window._bookAcHover = (idx) => {
+    _activeIndex = idx;
+    highlightItem(idx);
+  };
+
+  // ── Fetch from Google Books API ───────────────────────────
+  async function fetchBooks(query) {
+    showSpinner(true);
+    try {
+      const url = `${GBAPI}?q=${encodeURIComponent(query)}&maxResults=8&fields=items(volumeInfo(title,authors,pageCount,publishedDate,imageLinks))&langRestrict=`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      renderSuggestions(data.items || []);
+    } catch (e) {
+      console.warn('Google Books fetch error:', e);
+      const list = $ac('bookAcList');
+      if (list) list.innerHTML = `<div class="book-ac-empty">⚠️ Erro ao buscar. Verifique a conexão.</div>`;
+      openDropdown();
+    } finally {
+      showSpinner(false);
+    }
+  }
+
+  // ── Input handler (event delegation) ─────────────────────
+  document.addEventListener('input', (e) => {
+    if (e.target?.id !== 'mBookTitle') return;
+    const q = e.target.value.trim();
+    clearTimeout(_debounceTimer);
+
+    if (q.length < MIN_CHARS) {
+      closeDropdown(); showSpinner(false); return;
+    }
+    if (q === _lastQuery) return;
+    _lastQuery = q;
+
+    showSpinner(true);
+    _debounceTimer = setTimeout(() => fetchBooks(q), DEBOUNCE);
+  });
+
+  // ── Keyboard navigation ───────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.target?.id !== 'mBookTitle') return;
+    const dd = $ac('bookAcDropdown');
+    if (!dd?.classList.contains('open')) return;
+
+    const items = $ac('bookAcList')?.querySelectorAll('.book-ac-item') || [];
+    const count = items.length;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _activeIndex = (_activeIndex + 1) % count;
+      highlightItem(_activeIndex);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _activeIndex = (_activeIndex - 1 + count) % count;
+      highlightItem(_activeIndex);
+    } else if (e.key === 'Enter') {
+      if (_activeIndex >= 0 && _activeIndex < count) {
+        e.preventDefault();
+        e.stopImmediatePropagation();   // prevent planModal Enter trigger
+        window._bookAcSelect(_activeIndex);
+      }
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  }, true);  // capture phase so it runs before other keydown handlers
+
+  // ── Close dropdown when clicking outside ─────────────────
+  document.addEventListener('mousedown', (e) => {
+    const wrapper = $ac('bookAcWrapper');
+    if (wrapper && !wrapper.contains(e.target)) closeDropdown();
+  });
+
+  // ── Reset autocomplete when modal opens ──────────────────
+  const _origOpenBookModal = window.openBookModal;
+  window.openBookModal = () => {
+    _results     = [];
+    _activeIndex = -1;
+    _lastQuery   = '';
+    closeDropdown();
+    showSpinner(false);
+    if (_origOpenBookModal) _origOpenBookModal();
+  };
+
+  // ── Reset when modal closes ───────────────────────────────
+  const _origCloseBookModal = window.closeBookModal;
+  window.closeBookModal = () => {
+    clearTimeout(_debounceTimer);
+    closeDropdown();
+    showSpinner(false);
+    if (_origCloseBookModal) _origCloseBookModal();
+  };
+
+  console.log('[MyUniHub] Google Books autocomplete initialized ✅');
+})();
 
 
 (function boot() {
