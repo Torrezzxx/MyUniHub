@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers de autenticação (T005) ──
+    // Verifica se há um usuário autenticado na requisição.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Verifica se o usuário autenticado é o "dono" do recurso (uid bate).
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── Documento único do usuário (T007) ──
+    // Protege: profile, subjects, deadlines, weekPlans, books, checklist, studyHistory, timer
+    // Quem:    request.auth.uid deve coincidir com {uid}
+    // Por quê: isolamento multi-tenant (FR-002 / FR-003 / FR-004 / US1)
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ── Catch-all fail-closed (T006 / FR-009) ──
+    // Qualquer path não explicitamente permitido acima é negado por padrão.
+    // Esta regra DEVE ser a última do arquivo.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
