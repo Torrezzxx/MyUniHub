@@ -20,7 +20,9 @@
   </script>
 
   <!-- ── Tailwind CSS with custom config ── -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.0"
+        integrity="sha384-BFORbHAnibkzoc1a2dShGYmng06a+FfQET+B9Ugu+T8o+AWQjfQ4OJeWs024LXnN"
+        crossorigin="anonymous"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -68,7 +70,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
   <!-- ── Chart.js ── -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+        integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
+        crossorigin="anonymous"></script>
 
   <style>
     /* Base font */
@@ -946,7 +950,7 @@
             <div class="flex items-end gap-4">
               <div>
                 <div id="planXP" class="font-extrabold text-3xl tracking-tight" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0 XP</div>
-                <div class="text-xs text-slate-400 font-medium mt-0.5">pontos ganhos</div>
+]                <div class="text-xs text-slate-400 font-medium mt-0.5">pontos ganhos</div>
               </div>
               <div id="planStreak" class="flex-1 text-right">
                 <div class="text-2xl font-extrabold text-amber-500" id="planStreakNum">0🔥</div>
@@ -1780,7 +1784,8 @@
   </div>
 </div>
 
-<script type="module">
+<script type="module" integrity="sha384-fyXmjqzzeXEt/9oVcHtMPy+0WHTmJvZ6AKktOjxN3Vq681Q1f4LjykLv+xCSxdfS"
+        crossorigin="anonymous">
 import { initializeApp }               from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged,
          signInWithEmailAndPassword,
@@ -1789,6 +1794,7 @@ import { getAuth, onAuthStateChanged,
 import { getFirestore, doc, setDoc,
          onSnapshot, updateDoc,
          getDoc, deleteDoc }           from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+</script>
 
 // ── Firebase init ───────────────────────────────────────
 const app  = initializeApp({
