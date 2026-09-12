@@ -19,10 +19,9 @@
     })();
   </script>
 
-  <!-- ── Tailwind CSS with custom config ── -->
-  <script src="https://cdn.tailwindcss.com/3.4.0"
-        integrity="sha384-BFORbHAnibkzoc1a2dShGYmng06a+FfQET+B9Ugu+T8o+AWQjfQ4OJeWs024LXnN"
-        crossorigin="anonymous"></script>
+  <!-- Tailwind CSS v3.4.0 — sem SRI: cdn.tailwindcss.com não envia Access-Control-Allow-Origin,
+       então crossorigin="anonymous" bloqueia o carregamento via CORS. Ver quickstart.md. -->
+  <script src="https://cdn.tailwindcss.com/3.4.0"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
