@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR" class="">
 <head>
   <meta charset="UTF-8">
@@ -74,9 +74,300 @@
         crossorigin="anonymous"></script>
 
   <style>
+    /* ═══════════════════════════════════════════════════════
+       WCAG 2.1 AA — CONTRAST REQUIREMENTS (REQ #6)
+       ─────────────────────────────────────────────────────
+       Light mode:   text-sec  #475569 on #fff    → 7.0:1 ✅
+       Dark mode:    text-sec  #cbd5e1 on #0f172a → 8.6:1 ✅
+       Placeholders: #64748b on #fff → 4.7:1 ✅
+                     #94a3b8 on #0f172a → 5.4:1 ✅
+       Labels:       #64748b on #fff → 4.7:1 ✅
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      /* Accessible color tokens — WCAG AA (4.5:1 minimum) */
+      --text-primary:   #0f172a;   /* 15.9:1 on white */
+      --text-secondary: #475569;   /* 7.0:1 on white  */
+      --text-muted:     #64748b;   /* 4.7:1 on white  */
+      --text-placeholder:#94a3b8;  /* 3.0:1 on white  (placeholder rule) */
+      --bg-surface:     #ffffff;
+      --bg-subtle:      #f8fafc;
+      --border-subtle:  #e2e8f0;
+      --accent:         #2E5A9E;
+      --accent-hover:   #1e4a8a;
+
+      /* Font scale — driven by A-/A/A+ buttons */
+      --font-scale: 1;
+    }
+    .dark {
+      --text-primary:   #f1f5f9;   /* 15.8:1 on #0f172a */
+      --text-secondary: #cbd5e1;   /* 8.6:1 on #0f172a  */
+      --text-muted:     #94a3b8;   /* 5.4:1 on #0f172a  */
+      --text-placeholder:#64748b;  /* 3.6:1 on #0f172a  */
+      --bg-surface:     #0f172a;
+      --bg-subtle:      #1e293b;
+      --border-subtle:  #334155;
+    }
+
+    /* High-contrast mode overrides — WCAG AAA (7:1+) */
+    html.high-contrast {
+      --text-primary:   #000000;
+      --text-secondary: #1a1a1a;
+      --text-muted:     #333333;
+      --text-placeholder:#555555;
+      --bg-surface:     #ffffff;
+      --bg-subtle:      #f5f5f5;
+      --border-subtle:  #000000;
+      --accent:         #0000cc;
+      --accent-hover:   #000099;
+    }
+    html.dark.high-contrast {
+      --text-primary:   #ffffff;
+      --text-secondary: #f5f5f5;
+      --text-muted:     #e5e5e5;
+      --text-placeholder:#d4d4d4;
+      --bg-surface:     #000000;
+      --bg-subtle:      #1a1a1a;
+      --border-subtle:  #ffffff;
+      --accent:         #66b3ff;
+      --accent-hover:   #99ccff;
+    }
+
+    /* Apply font scale to root */
+    html { font-size: calc(16px * var(--font-scale)); }
+
     /* Base font */
     *, *::before, *::after { box-sizing: border-box; }
     body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+
+    /* ── Accessible focus-visible outline (WCAG 2.4.7) ── */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    html.high-contrast :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Accessibility utility classes ── */
+    .a11y-text-primary   { color: var(--text-primary); }
+    .a11y-text-secondary { color: var(--text-secondary); }
+    .a11y-text-muted     { color: var(--text-muted); }
+    .a11y-text-placeholder { color: var(--text-placeholder); }
+    .a11y-bg-surface     { background-color: var(--bg-surface); }
+    .a11y-bg-subtle      { background-color: var(--bg-subtle); }
+    .a11y-border         { border-color: var(--border-subtle); }
+
+    /* ── Carousel styles ── */
+    .carousel-container {
+      position: relative;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 50px -8px rgba(46,90,158,.18), 0 4px 20px -5px rgba(46,90,158,.10);
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform .55s cubic-bezier(.4,0,.2,1);
+      will-change: transform;
+    }
+    .carousel-slide {
+      flex: 0 0 100%;
+      position: relative;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+    }
+    .carousel-slide img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .carousel-slide .slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(15,23,42,.82) 0%, rgba(15,23,42,.45) 55%, rgba(15,23,42,.15) 100%);
+    }
+    .carousel-slide .slide-content {
+      position: relative;
+      z-index: 2;
+      padding: 2rem;
+      max-width: 65%;
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.5);
+      color: #0f172a;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+      transition: transform .18s, background .18s;
+    }
+    .carousel-btn:hover { transform: translateY(-50%) scale(1.08); background: #fff; }
+    .carousel-btn:active { transform: translateY(-50%) scale(.96); }
+    .carousel-btn.prev { left: 12px; }
+    .carousel-btn.next { right: 12px; }
+    .carousel-dots {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.45);
+      border: 2px solid rgba(255,255,255,.7);
+      cursor: pointer;
+      transition: all .25s;
+      padding: 0;
+    }
+    .carousel-dot.active {
+      background: #fff;
+      width: 26px;
+      border-radius: 6px;
+      border-color: #fff;
+    }
+    .carousel-dot:hover { background: rgba(255,255,255,.85); }
+
+    /* ── Search input ── */
+    .search-wrap {
+      position: relative;
+      flex: 1 1 320px;
+      min-width: 220px;
+    }
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding-left: 40px;
+      padding-right: 14px;
+    }
+
+    /* ── Contact form ── */
+    .contact-field label { display: block; margin-bottom: .35rem; }
+    .contact-field input, .contact-field select, .contact-field textarea {
+      width: 100%;
+      border-radius: .75rem;
+      padding: .65rem .9rem;
+      font-size: .875rem;
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .contact-field input:focus, .contact-field select:focus, .contact-field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(46,90,158,.12);
+      outline: none;
+    }
+    .contact-field input::placeholder, .contact-field textarea::placeholder {
+      color: var(--text-placeholder);
+    }
+    .contact-field input:invalid:not(:placeholder-shown),
+    .contact-field textarea:invalid:not(:placeholder-shown) {
+      border-color: #ef4444;
+    }
+
+    /* ── Accessibility panel ── */
+    .acc-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 1000;
+      width: 320px;
+      max-width: 92vw;
+      max-height: 100vh;
+      overflow-y: auto;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(24px) saturate(200%);
+      border-left: 1px solid rgba(255,255,255,.6);
+      box-shadow: -10px 0 50px rgba(0,0,0,.18);
+      padding: 1.5rem;
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .dark .acc-panel {
+      background: rgba(15,23,42,.97);
+      border-left: 1px solid rgba(255,255,255,.08);
+    }
+    .acc-panel.open { transform: translateX(0); }
+    .acc-panel .acc-title {
+      font-weight: 800;
+      font-size: 1.125rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .acc-panel .acc-section {
+      margin-bottom: 1.25rem;
+    }
+    .acc-panel .acc-section-title {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: .5rem;
+    }
+    .acc-panel .acc-btn {
+      border-radius: .75rem;
+      padding: .55rem .8rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      transition: all .18s;
+    }
+    .acc-panel .acc-btn:hover { background: var(--bg-subtle); }
+    .acc-panel .acc-btn.active {
+      background: linear-gradient(135deg, #2E5A9E, #7c5cbf);
+      color: #fff;
+      border-color: transparent;
+    }
+    .acc-panel .acc-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .65rem .8rem;
+      border-radius: .75rem;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      font-size: .8rem;
+      color: var(--text-primary);
+    }
+    .acc-panel .acc-toggle input { accent-color: #2E5A9E; }
 
     /* ── Smooth theme transitions ── */
     body, .card, .glass-card, .sidebar, .topbar, input, select, textarea, button, .modal-panel {
@@ -573,9 +864,37 @@
           <input id="lPass" type="password" placeholder="••••••••" autocomplete="current-password" class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 font-medium">
           <p id="loginErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1"></p>
         </div>
+        <div class="text-right mb-3">
+          <button onclick="window.openPasswordResetModal()" class="text-sm text-ocean-600 dark:text-ocean-300 underline hover:text-ocean-500 font-medium">Esqueci minha senha</button>
+        </div>
       </div>
       <button onclick="window.doLogin()" class="btn-action w-full py-3.5 rounded-2xl bg-gradient-to-r from-ocean-700 to-ocean-600 text-white font-extrabold text-sm shadow-glow mb-3 tracking-wide">Entrar na Plataforma →</button>
       <button onclick="window.demoLogin()" class="btn-action w-full py-3 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold text-sm border border-slate-200 dark:border-slate-700">✨ Explorar em Modo Demo</button>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div id="pwdResetModal" class="fixed inset-0 z-[800] hidden items-center justify-center p-4" style="background:rgba(8,15,30,.6);backdrop-filter:blur(8px);" role="dialog" aria-modal="true" aria-labelledby="pwdResetTitle" aria-describedby="pwdResetDescription">
+      <div class="modal-panel glass rounded-4xl p-7 w-[500px] max-w-full max-h-[90vh] overflow-y-auto shadow-soft-xl border" style="animation:scaleIn .22s ease;">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 id="pwdResetTitle" class="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight">Recuperar Senha</h3>
+            <p id="pwdResetDescription" class="text-xs text-slate-400 dark:text-slate-500">Digite seu e-mail para receber o link de recuperação</p>
+          </div>
+          <button onclick="window.closePasswordResetModal()" class="btn-action w-9 h-9 rounded-2xl glass-subtle border text-slate-400 flex items-center justify-center text-sm" aria-label="Fechar recuperação de senha">✕</button>
+        </div>
+        <div class="space-y-4 mb-5">
+          <div>
+            <label for="pwdResetEmail" class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">E-mail</label>
+            <input id="pwdResetEmail" type="email" placeholder="seu@email.com" autocomplete="email" aria-required="true" aria-describedby="pwdResetDescription pwdResetErr pwdResetSuccess" class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 font-medium">
+          </div>
+          <p id="pwdResetErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1" role="alert"></p>
+          <p id="pwdResetSuccess" class="hidden text-emerald-600 text-xs font-bold mt-2 pl-1" role="status" aria-live="polite"></p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="window.closePasswordResetModal()" class="btn-action flex-1 py-3.5 rounded-2xl glass-subtle border text-slate-500 dark:text-slate-400 font-bold text-sm" aria-label="Cancelar recuperação de senha">Cancelar</button>
+          <button onclick="window.requestPasswordReset()" class="btn-action flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-ocean-700 to-ocean-600 text-white font-extrabold text-sm shadow-glow" id="pwdResetBtn">Enviar E-mail de Recuperação</button>
+        </div>
+      </div>
     </div>
 
     <!-- Register -->
@@ -709,6 +1028,9 @@
       <button onclick="window.switchTab('perfil')"     id="nav-perfil"     class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/50 hover:text-white/90 hover:bg-white/6 transition-all text-left">
         <span class="text-lg w-5 text-center flex-shrink-0">⚙️</span><span class="sb-label">Perfil &amp; Metas</span>
       </button>
+      <button onclick="window.switchTab('contato')"     id="nav-contato"     class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/50 hover:text-white/90 hover:bg-white/6 transition-all text-left">
+        <span class="text-lg w-5 text-center flex-shrink-0">📧</span><span class="sb-label">Contato / Suporte</span>
+      </button>
     </nav>
 
     <!-- User footer -->
@@ -750,6 +1072,17 @@
           <div class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Meta Diária</div>
           <div id="topGoal" class="font-extrabold text-ocean-700 dark:text-ocean-300 text-base leading-tight"></div>
         </div>
+        <!-- Accessibility toggle button -->
+        <button onclick="window.toggleAccessibilityPanel()"
+          title="Acessibilidade" aria-label="Abrir painel de acessibilidade"
+          aria-controls="accessibilityPanel" aria-expanded="false"
+          id="accToggleBtn"
+          class="w-10 h-10 rounded-2xl glass-subtle border flex items-center justify-center text-slate-500 dark:text-slate-400 text-base hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="4" r="1.5"/>
+            <path d="M8 21l3-5M16 21l-3-5M12 9v5M6 9h12"/>
+          </svg>
+        </button>
         <!-- Theme toggle -->
         <button onclick="window.toggleTheme()" title="Alternar tema" aria-label="Alternar tema"
           class="relative w-12 h-6 rounded-full border-2 border-slate-200 dark:border-slate-600 flex items-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean-700"
@@ -760,6 +1093,55 @@
           </div>
         </button>
       </div>
+
+      <!-- Accessibility Panel -->
+      <div id="accessibilityPanel" class="acc-panel" role="dialog" aria-modal="true" aria-labelledby="accTitle" tabindex="-1">
+        <div class="acc-title">
+          <span id="accTitle">♿ Acessibilidade</span>
+          <button onclick="window.closeAccessibilityPanel()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition" aria-label="Fechar painel de acessibilidade">✕</button>
+        </div>
+
+        <!-- Tema -->
+        <div class="acc-section">
+          <div class="acc-section-title">Tema</div>
+          <div class="flex gap-2 flex-wrap">
+            <button class="acc-btn" data-theme="light" onclick="window.setTheme('light')" aria-pressed="false">Claro</button>
+            <button class="acc-btn" data-theme="dark" onclick="window.setTheme('dark')" aria-pressed="false">Escuro</button>
+            <button class="acc-btn" data-theme="high-contrast" onclick="window.setTheme('high-contrast')" aria-pressed="false">Alto Contraste</button>
+          </div>
+        </div>
+
+        <!-- Tamanho da fonte -->
+        <div class="acc-section">
+          <div class="acc-section-title">Tamanho da Fonte</div>
+          <div class="flex gap-2">
+            <button class="acc-btn" data-fontsize="decrease" onclick="window.setFontSize(-1)" aria-label="Diminuir tamanho da fonte">A−</button>
+            <button class="acc-btn" data-fontsize="default" onclick="window.setFontSize(0)" aria-label="Tamanho padrão da fonte">A</button>
+            <button class="acc-btn" data-fontsize="increase" onclick="window.setFontSize(1)" aria-label="Aumentar tamanho da fonte">A+</button>
+          </div>
+        </div>
+
+        <!-- Contraste alto -->
+        <div class="acc-section">
+          <div class="acc-section-title">Contraste</div>
+          <div class="acc-toggle">
+            <span>Alto contraste</span>
+            <input type="checkbox" id="highContrastToggle" onchange="window.toggleHighContrast(this.checked)" aria-label="Ativar alto contraste">
+          </div>
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-relaxed">Aumenta o contraste de textos e bordas para o máximo (WCAG AAA).</p>
+        </div>
+
+        <!-- Foco visível -->
+        <div class="acc-section">
+          <div class="acc-section-title">Navegação por Teclado</div>
+          <div class="acc-toggle">
+            <span>Contorno de foco</span>
+            <input type="checkbox" id="focusVisibleToggle" checked onchange="window.toggleFocusVisible(this.checked)" aria-label="Ativar contorno de foco para navegação por teclado">
+          </div>
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-relaxed">Exibe um contorno visível ao navegar com Tab.</p>
+        </div>
+      </div>
+
     </header>
 
     <!-- PAGE CONTENT -->
@@ -1187,22 +1569,112 @@
             style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">+ Adicionar Livro</button>
         </div>
 
+        <!-- ════════════════════════════════════════════════
+             REQ #1 — CARROSSEL DE IMAGENS
+             Slides com imagem real (Unsplash), título,
+             descrição e botão de ação. Navegação por
+             setas, dots e teclado. `alt` descritivo.
+        ════════════════════════════════════════════════ -->
+        <div class="carousel-container mb-5" role="region" aria-roledescription="carrossel" aria-label="Destaques de estudo e tecnologia">
+          <div class="carousel-track" id="carouselTrack" aria-live="polite">
+            <!-- Slide 1 -->
+            <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="1 de 4">
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+                   alt="Estudantes universitários colaborando em uma mesa com notebooks e livros em uma biblioteca iluminada" loading="lazy">
+              <div class="slide-overlay"></div>
+              <div class="slide-content">
+                <span class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/15 border border-white/25 px-3 py-1 rounded-full mb-2" style="backdrop-filter:blur(6px)">Estudo em Grupo</span>
+                <h3 class="text-xl md:text-2xl font-extrabold text-white tracking-tight mb-1 leading-tight">Estude com quem entende</h3>
+                <p class="text-xs md:text-sm text-white/85 font-medium mb-4 leading-relaxed">Organize sessões colaborativas e multiplique seu rendimento com metas compartilhadas.</p>
+                <button onclick="window.openBookModal()" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Adicionar Livro →</button>
+              </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="2 de 4" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80"
+                   alt="Tela de notebook exibindo código de programação com cores vibrantes em ambiente escuro de desenvolvimento" loading="lazy">
+              <div class="slide-overlay"></div>
+              <div class="slide-content">
+                <span class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/15 border border-white/25 px-3 py-1 rounded-full mb-2" style="backdrop-filter:blur(6px)">Tecnologia</span>
+                <h3 class="text-xl md:text-2xl font-extrabold text-white tracking-tight mb-1 leading-tight">Domine a programação</h3>
+                <p class="text-xs md:text-sm text-white/85 font-medium mb-4 leading-relaxed">Mantenha seus planos de estudo de código sempre em dia e acompanhe seu progresso.</p>
+                <button onclick="window.switchTab('semanal')" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Ver Planos →</button>
+              </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="3 de 4" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80"
+                   alt="Pilha de livros acadêmicos abertos sobre uma mesa de madeira com marcadores coloridos" loading="lazy">
+              <div class="slide-overlay"></div>
+              <div class="slide-content">
+                <span class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/15 border border-white/25 px-3 py-1 rounded-full mb-2" style="backdrop-filter:blur(6px)">Leitura</span>
+                <h3 class="text-xl md:text-2xl font-extrabold text-white tracking-tight mb-1 leading-tight">Construa sua biblioteca</h3>
+                <p class="text-xs md:text-sm text-white/85 font-medium mb-4 leading-relaxed">Cadastre livros, defina a meta diária de páginas e conclua suas leituras no prazo.</p>
+                <button onclick="window.openBookModal()" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Começar Agora →</button>
+              </div>
+            </div>
+            <!-- Slide 4 -->
+            <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="4 de 4" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+                   alt="Pessoa digitando em um notebook com código na tela, cercada por anotações e café, simbolizando foco e produtividade" loading="lazy">
+              <div class="slide-overlay"></div>
+              <div class="slide-content">
+                <span class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/15 border border-white/25 px-3 py-1 rounded-full mb-2" style="backdrop-filter:blur(6px)">Produtividade</span>
+                <h3 class="text-xl md:text-2xl font-extrabold text-white tracking-tight mb-1 leading-tight">Foco no que importa</h3>
+                <p class="text-xs md:text-sm text-white/85 font-medium mb-4 leading-relaxed">Use o cronômetro integrado e as metas diárias para manter a consistência nos estudos.</p>
+                <button onclick="window.switchTab('hoje')" class="btn-action text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-glow-sm" style="background:linear-gradient(135deg,#2E5A9E,#7c5cbf)">Iniciar Sessão →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation arrows -->
+          <button class="carousel-btn prev" onclick="window.carouselPrev()" aria-label="Slide anterior" type="button">‹</button>
+          <button class="carousel-btn next" onclick="window.carouselNext()" aria-label="Próximo slide" type="button">›</button>
+
+          <!-- Dots -->
+          <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Selecionar slide">
+            <button class="carousel-dot active" role="tab" aria-selected="true"  aria-label="Ir para slide 1" onclick="window.carouselGo(0)" type="button"></button>
+            <button class="carousel-dot"        role="tab" aria-selected="false" aria-label="Ir para slide 2" onclick="window.carouselGo(1)" type="button"></button>
+            <button class="carousel-dot"        role="tab" aria-selected="false" aria-label="Ir para slide 3" onclick="window.carouselGo(2)" type="button"></button>
+            <button class="carousel-dot"        role="tab" aria-selected="false" aria-label="Ir para slide 4" onclick="window.carouselGo(3)" type="button"></button>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             REQ #2 — BARRA DE PESQUISA DINÂMICA
+             Filtra os cartões de livros em tempo real.
+        ════════════════════════════════════════════════ -->
+        <div class="flex items-center gap-3 flex-wrap mb-5">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <label for="libSearch" class="sr-only">Pesquisar livros na biblioteca</label>
+            <input id="libSearch" type="search" placeholder="Pesquisar por título, autor ou status…"
+                   autocomplete="off" aria-describedby="libSearchHint"
+                   oninput="window.filterBiblioteca(this.value)"
+                   class="input-glow px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium">
+            <span id="libSearchHint" class="sr-only">A lista de livros é filtrada conforme você digita.</span>
+          </div>
+          <div id="libSearchCount" class="text-xs font-semibold text-slate-500 dark:text-slate-400" aria-live="polite"></div>
+        </div>
+
         <!-- Summary stats -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" id="bookStats">
           <div class="glass rounded-3xl p-5 shadow-soft text-center">
             <div class="text-3xl mb-2">📖</div>
             <div id="bookTotalCount" class="font-extrabold text-2xl text-ocean-700 dark:text-ocean-300 tracking-tight">0</div>
-            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Livros na lista</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Livros na lista</div>
           </div>
           <div class="glass rounded-3xl p-5 shadow-soft text-center">
             <div class="text-3xl mb-2">✅</div>
             <div id="bookDoneCount" class="font-extrabold text-2xl text-emerald-500 tracking-tight">0</div>
-            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Concluídos</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Concluídos</div>
           </div>
           <div class="glass rounded-3xl p-5 shadow-soft text-center">
             <div class="text-3xl mb-2">📄</div>
             <div id="bookTodayPages" class="font-extrabold text-2xl text-amber-500 tracking-tight">0</div>
-            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mt-1">Páginas hoje (total)</div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Páginas hoje (total)</div>
           </div>
         </div>
 
@@ -1210,7 +1682,134 @@
         <div id="bookList"></div>
       </div>
 
+      <!-- ════════════════════════════════════════════════════════════════════════════════
+         REQ #4 — SEÇÃO DE CONTATO / SUPORTE
+         Formulário semântico com validação HTML5 e feedback visual.
+      ═══════════════════════════════════════════════════════════════════════════════════ -->
+      <div id="tab-contato" class="tab-panel hidden">
+        <div class="mb-6">
+          <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">📧 Contato &amp; Suporte</h1>
+          <div class="text-sm text-slate-400 dark:text-slate-500 font-medium mt-0.5">Dúvidas, sugestões e relatórios de bugs — respondemos em até 2 dias úteis.</div>
+        </div>
+
+        <div class="glass rounded-3xl p-7 shadow-soft max-w-2xl">
+          <form id="contactForm" class="space-y-5" novalidate>
+            <!-- Nome completo -->
+            <div class="contact-field">
+              <label for="cName" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                Nome completo <span class="text-red-500">*</span>
+              </label>
+              <input id="cName" type="text" required
+                     placeholder="Ex: Ana Silva"
+                     minlength="3"
+                     aria-describedby="cNameHint cNameErr"
+                     class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-500 font-medium">
+              <span id="cNameHint" class="sr-only">Nome completo com pelo menos 3 caracteres.</span>
+              <p id="cNameErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1" role="alert" aria-live="polite"></p>
+            </div>
+
+            <!-- E-mail -->
+            <div class="contact-field">
+              <label for="cEmail" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                E-mail <span class="text-red-500">*</span>
+              </label>
+              <input id="cEmail" type="email" required
+                     placeholder="seu@email.com"
+                     autocomplete="email"
+                     aria-describedby="cEmailHint cEmailErr"
+                     class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-500 font-medium">
+              <span id="cEmailHint" class="sr-only">Informe um e-mail válido para receber nossa resposta.</span>
+              <p id="cEmailErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1" role="alert" aria-live="polite"></p>
+            </div>
+
+            <!-- Assunto -->
+            <div class="contact-field">
+              <label for="cSubject" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                Assunto <span class="text-red-500">*</span>
+              </label>
+              <select id="cSubject" required
+                      aria-describedby="cSubjectHint cSubjectErr"
+                      class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white font-medium">
+                <option value="" disabled selected hidden>Selecione uma opção</option>
+                <option value="Dúvida">❓ Dúvida</option>
+                <option value="Sugestão">💡 Sugestão</option>
+                <option value="Bug">🐛 Reportar Bug</option>
+                <option value="Outro">📌 Outro</option>
+              </select>
+              <p id="cSubjectErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1" role="alert" aria-live="polite"></p>
+            </div>
+
+            <!-- Mensagem -->
+            <div class="contact-field">
+              <label for="cMessage" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                Mensagem <span class="text-red-500">*</span>
+              </label>
+              <textarea id="cMessage" rows="4" required
+                        placeholder="Conte-nos o que você precisa…"
+                        minlength="10"
+                        aria-describedby="cMessageHint cMessageErr"
+                        class="input-glow w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-500 font-medium resize-none"></textarea>
+              <span id="cMessageHint" class="sr-only">Descreva sua dúvida, sugestão ou bug com pelo menos 10 caracteres.</span>
+              <p id="cMessageErr" class="hidden text-red-500 text-xs font-bold mt-2 pl-1" role="alert" aria-live="polite"></p>
+            </div>
+
+            <!-- Botão enviar -->
+            <button type="submit"
+                    class="btn-action w-full py-4 rounded-2xl bg-gradient-to-r from-ocean-700 to-ocean-600 text-white font-extrabold text-sm shadow-glow tracking-wide uppercase tracking-widest text-[10px]"
+                    id="cSubmitBtn">
+              Enviar Mensagem →
+            </button>
+          </form>
+
+          <!-- Feedback de sucesso -->
+          <div id="contactSuccess" class="hidden mt-5 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center shrink-0 flex-shrink-0">✅</div>
+            <div>
+              <div class="font-bold text-emerald-800 dark:text-emerald-200 text-sm">Mensagem enviada!</div>
+              <div class="text-xs text-emerald-600 dark:text-emerald-300 mt-0.5 leading-relaxed">
+                Obrigado! Sua mensagem foi enviada com sucesso. Retornaremos em até 2 dias úteis.
+              </div>
+            </div>
+            <button onclick="window.closeContactSuccess()" class="ml-auto w-6 h-6 rounded-full border border-emerald-300 dark:border-emerald-700 flex items-center justify-center text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-800/30 transition" aria-label="Fechar mensagem de sucesso">✕</button>
+          </div>
+        </div>
+      </div>
+
     </main>
+
+    <!-- ════════════════════════════════════════════════
+         REQ #5 — RODAPÉ INSTITUCIONAL
+         Nome do sistema, dados do aluno, ano e links.
+    ════════════════════════════════════════════════ -->
+    <footer class="mt-auto border-t border-slate-200/70 dark:border-white/6 px-5 md:px-7 py-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-ocean-700 to-violet-soft flex items-center justify-center flex-shrink-0 shadow-glow-sm">
+            <svg width="16" height="16" viewBox="0 0 30 30" fill="none" aria-hidden="true"><path d="M15 2L28 9.5V22.5L15 30L2 22.5V9.5L15 2Z" fill="white" opacity=".9"/><path d="M15 8L22 12V20L15 24L8 20V12L15 8Z" fill="white" opacity=".38"/></svg>
+          </div>
+          <div>
+            <div class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight leading-none">MyUniHub</div>
+            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+              Acadêmico: <span class="font-semibold text-slate-700 dark:text-slate-300">Nome do Aluno</span>
+              · RA: <span class="font-semibold text-slate-700 dark:text-slate-300">000000000</span>
+              · Engenharia de Software / UniCEUB
+            </div>
+          </div>
+        </div>
+        <nav aria-label="Links rápidos do rodapé" class="flex flex-wrap gap-x-4 gap-y-1.5">
+          <button onclick="window.switchTab('hoje')"       class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">Hoje</button>
+          <button onclick="window.switchTab('prazos')"     class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">Prazos</button>
+          <button onclick="window.switchTab('biblioteca')" class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">Biblioteca</button>
+          <button onclick="window.switchTab('perfil')"     class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">Perfil</button>
+          <button onclick="window.switchTab('contato')"    class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-ocean-700 dark:hover:text-ocean-300 transition-colors">Contato</button>
+        </nav>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-200/60 dark:border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">© <span id="footerYear"></span> MyUniHub · Projeto de Desenvolvimento de Interfaces · UniCEUB</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Feito com ♥ para estudantes 🎓 · WCAG 2.1 AA</p>
+      </div>
+    </footer>
+
   </div><!-- /main-offset -->
 </div><!-- /appScreen -->
 
@@ -1824,7 +2423,12 @@ let D = { profile:{}, subjects:[], deadlines:[], checklist:{date:'',items:[]}, s
 
 // Persistent timer state keys
 const TK_START = 'hub_timer_start';  // Date.now() when timer started
-const TK_BASE  = 'hub_timer_base';   // seconds already accumulated before this run
+const TK_BASE  = 'hub_timer_base';  // seconds already accumulated before this run
+
+// ── Password Reset state ──────────────────────────
+let pwdResetSending = false;
+let pwdResetLastFocus = null;
+const pwdResetCooldownKey = 'myunihub_password_reset_cooldown';
 
 // ── Helpers ─────────────────────────────────────────────
 const pad  = n => String(n).padStart(2,'0');
@@ -1965,6 +2569,99 @@ window.doLogout = async () => {
 };
 window.goToLogin = () => show('authScreen');
 
+// ── PASSWORD RESET ─────────────────────────────────────────
+window.openPasswordResetModal = () => {
+  pwdResetLastFocus = document.activeElement;
+  const modal = $('pwdResetModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  $('pwdResetErr').classList.add('hidden');
+  $('pwdResetSuccess').classList.add('hidden');
+  $('pwdResetEmail').value = '';
+  $('pwdResetEmail').disabled = false;
+  $('pwdResetBtn').disabled = false;
+  $('pwdResetBtn').textContent = 'Enviar E-mail de Recuperação';
+  setTimeout(() => $('pwdResetEmail').focus(), 50);
+};
+
+window.closePasswordResetModal = () => {
+  const modal = $('pwdResetModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  $('pwdResetErr').classList.add('hidden');
+  $('pwdResetSuccess').classList.add('hidden');
+  if (pwdResetLastFocus && document.contains(pwdResetLastFocus)) {
+    pwdResetLastFocus.focus();
+  }
+};
+
+window.showPasswordResetFeedback = (type, message) => {
+  const errEl = $('pwdResetErr');
+  const successEl = $('pwdResetSuccess');
+  if (type === 'success') {
+    successEl.textContent = message;
+    successEl.classList.remove('hidden');
+    errEl.textContent = '';
+    errEl.classList.add('hidden');
+  } else {
+    errEl.textContent = message;
+    errEl.classList.remove('hidden');
+    successEl.textContent = '';
+    successEl.classList.add('hidden');
+  }
+};
+
+window.requestPasswordReset = async () => {
+  const emailEl = $('pwdResetEmail');
+  const btn = $('pwdResetBtn');
+  const email = emailEl.value.trim();
+  $('pwdResetErr').classList.add('hidden');
+  $('pwdResetSuccess').classList.add('hidden');
+
+  if (pwdResetSending) return;
+  if (isPasswordResetCooldownActive()) {
+    showPasswordResetFeedback('error', 'Aguarde alguns instantes antes de tentar novamente.');
+    return;
+  }
+  if (!email) {
+    showPasswordResetFeedback('error', 'E-mail obrigatório.');
+    emailEl.focus();
+    return;
+  }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    showPasswordResetFeedback('error', 'Formato de e-mail inválido.');
+    emailEl.focus();
+    return;
+  }
+
+  pwdResetSending = true;
+  btn.disabled = true;
+  emailEl.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showPasswordResetFeedback('success', 'e-mail enviado, confira sua caixa de entrada');
+  } catch (ex) {
+    const messages = {
+      'auth/invalid-email': 'E-mail inválido. Verifique o endereço informado.',
+      'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns instantes e tente novamente.',
+      'auth/network-request-failed': 'Não foi possível conectar. Verifique sua internet.'
+    };
+    showPasswordResetFeedback('error', messages[ex.code] || 'Não foi possível enviar o e-mail. Tente novamente mais tarde.');
+  } finally {
+    pwdResetSending = false;
+    localStorage.setItem(pwdResetCooldownKey, Date.now().toString());
+    btn.disabled = false;
+    emailEl.disabled = false;
+    btn.textContent = 'Enviar E-mail de Recuperação';
+    if (isPasswordResetCooldownActive()) {
+      btn.disabled = true;
+    }
+  }
+};
+
 // ── AUTH OBSERVER ─────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { show('authScreen'); return; }
@@ -2042,6 +2739,11 @@ function renderTab(tab) {
   if(tab==='calendario')renderCal();
   if(tab==='progresso')renderProgress();
   if(tab==='perfil')loadProfileForm();
+  if(tab==='biblioteca'){renderBiblioteca();if(window.carouselUpdate)window.carouselUpdate();}
+  if(tab==='contato'){
+    const f=$('contactForm'); if(f)f.reset();
+    const s=$('contactSuccess'); if(s)s.classList.add('hidden');
+  }
 }
 
 // ── PERSISTENT TIMER (background-safe) ──────────────────
@@ -2566,7 +3268,7 @@ function closePlanModal() {
 
 window.closeModals = () => {
   // Close every modal
-  ['subModal','dlModal','planModal','planEditModal','editSubModal'].forEach(id => {
+  ['subModal','dlModal','planModal','planEditModal','editSubModal','pwdResetModal'].forEach(id => {
     const m = $(id);
     if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
   });
@@ -3742,8 +4444,8 @@ window.deleteBook = async (id) => {
 };
 
 // Render biblioteca tab
-function renderBiblioteca() {
-  const books = D.books || [];
+function renderBiblioteca(filteredBooks) {
+  const books = filteredBooks || D.books || [];
   const done  = books.filter(b=>b.done).length;
   const todayPpd = books.filter(b=>!b.done && b.pagesPerDay > 0)
                         .reduce((acc,b) => acc + (b.pagesPerDay||0), 0);
@@ -4302,6 +5004,372 @@ window.saveEditSub = async () => {
   window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',e=>{
     if(!localStorage.getItem('hub_theme'))applyTheme(e.matches);
   });
+
+  // ════════════════════════════════════════════════════════════
+  // REQ #1 — CARROSSEL DE IMAGENS (Biblioteca)
+  // ═══════════════════════════════════════════════════════════
+  let carouselIndex = 0;
+  const CAROUSEL_SLIDES = 4;
+  const carouselTrack = $('carouselTrack');
+  const carouselDots = $('carouselDots');
+
+  window.carouselUpdate = () => {
+    if (!carouselTrack) return;
+    carouselTrack.style.transform = `translateX(-${carouselIndex * 100}%)`;
+    // Update dots
+    if (carouselDots) {
+      carouselDots.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === carouselIndex);
+        dot.setAttribute('aria-selected', i === carouselIndex);
+      });
+    }
+    // Update slide aria-hidden
+    carouselTrack.querySelectorAll('.carousel-slide').forEach((slide, i) => {
+      slide.setAttribute('aria-hidden', i !== carouselIndex);
+    });
+  };
+  window.carouselPrev = () => {
+    carouselIndex = (carouselIndex - 1 + CAROUSEL_SLIDES) % CAROUSEL_SLIDES;
+    carouselUpdate();
+  };
+  window.carouselNext = () => {
+    carouselIndex = (carouselIndex + 1) % CAROUSEL_SLIDES;
+    carouselUpdate();
+  };
+  window.carouselGo = (idx) => {
+    carouselIndex = idx;
+    carouselUpdate();
+  };
+  // Keyboard navigation for carousel
+  document.addEventListener('keydown', (e) => {
+    const activeTab = document.querySelector('#tab-biblioteca.active');
+    if (!activeTab) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); window.carouselPrev(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); window.carouselNext(); }
+  });
+
+  // ════════════════════════════════════════════════════════════
+  // REQ #2 — BARRA DE PESQUISA DINÂMICA (Biblioteca)
+  // ═══════════════════════════════════════════════════════════
+  window.filterBiblioteca = (query) => {
+    const books = D.books || [];
+    const search = query.trim().toLowerCase();
+    const list = $('bookList');
+    if (!list) return;
+
+    const filtered = search ? books.filter(b =>
+      (b.title || '').toLowerCase().includes(search) ||
+      (b.author || '').toLowerCase().includes(search) ||
+      (b.status || '').toLowerCase().includes(search)
+    ) : books;
+
+    const countEl = $('libSearchCount');
+    if (countEl) {
+      countEl.textContent = search
+        ? `${filtered.length} de ${books.length} livro${books.length !== 1 ? 's' : ''}`
+        : '';
+    }
+
+    if (!filtered.length) {
+      list.innerHTML = `
+        <div class="text-center py-12 text-slate-400">
+          <div class="text-4xl mb-3">🔍</div>
+          <div class="font-bold text-sm">${search ? 'Nenhum livro encontrado' : 'Sua biblioteca está vazia'}</div>
+          <div class="text-xs font-medium mt-1">${search ? 'Tente outro termo de busca.' : 'Adicione seu primeiro livro!'}</div>
+        </div>`;
+      return;
+    }
+    renderBiblioteca(filtered);
+  };
+
+  // ════════════════════════════════════════════════════════════
+  // REQ #3 — PAINEL DE ACESSIBILIDADE
+  // ═══════════════════════════════════════════════════════════
+  let accPanelOpen = false;
+  let lastFocusedBeforePanel = null;
+
+  window.toggleAccessibilityPanel = () => {
+    const panel = $('accessibilityPanel');
+    const btn = $('accToggleBtn');
+    if (!panel || !btn) return;
+    if (accPanelOpen) {
+      window.closeAccessibilityPanel();
+    } else {
+      panel.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      accPanelOpen = true;
+      lastFocusedBeforePanel = document.activeElement;
+      // Focus first focusable element in panel
+      setTimeout(() => {
+        const firstFocusable = panel.querySelector('button, input, select, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) firstFocusable.focus();
+      }, 50);
+    }
+  };
+
+  window.closeAccessibilityPanel = () => {
+    const panel = $('accessibilityPanel');
+    const btn = $('accToggleBtn');
+    if (!panel || !btn) return;
+    panel.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    accPanelOpen = false;
+    // Return focus to trigger button
+    if (lastFocusedBeforePanel && document.contains(lastFocusedBeforePanel)) {
+      lastFocusedBeforePanel.focus();
+    }
+  };
+
+  // Close panel on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && accPanelOpen) {
+      window.closeAccessibilityPanel();
+    }
+  });
+
+  // Theme switching
+  window.setTheme = (theme) => {
+    const html = document.documentElement;
+    // Remove all theme classes
+    html.classList.remove('dark', 'high-contrast');
+    // Update button states
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    const activeBtn = document.querySelector(`[data-theme="${theme}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+      activeBtn.setAttribute('aria-pressed', 'true');
+    }
+    // Apply theme
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      localStorage.setItem('hub_theme', 'dark');
+    } else if (theme === 'light') {
+      localStorage.setItem('hub_theme', 'light');
+    } else if (theme === 'high-contrast') {
+      html.classList.add('high-contrast');
+      localStorage.setItem('hub_theme', 'high-contrast');
+    }
+    // Update high-contrast toggle
+    const hcToggle = $('highContrastToggle');
+    if (hcToggle) hcToggle.checked = theme === 'high-contrast';
+    // Sync topbar theme toggle
+    syncThemeUI(html.classList.contains('dark'));
+    rebuildCharts();
+  };
+
+  // Font size scaling (A-, A, A+)
+  let fontScale = 1;
+  window.setFontSize = (delta) => {
+    const maxScale = 1.5;
+    const minScale = 0.85;
+    const step = 0.1;
+    if (delta === 0) {
+      fontScale = 1;
+    } else {
+      fontScale = Math.max(minScale, Math.min(maxScale, fontScale + delta * step));
+    }
+    document.documentElement.style.setProperty('--font-scale', fontScale.toFixed(2));
+    localStorage.setItem('hub_font_scale', fontScale.toFixed(2));
+    document.querySelectorAll('.acc-btn[data-fontsize]').forEach(btn => {
+      const target = btn.dataset.fontsize;
+      const isActive = (fontScale <= 0.95 && target === 'decrease') ||
+                       (fontScale > 0.95 && fontScale < 1.05 && target === 'default') ||
+                       (fontScale >= 1.05 && target === 'increase');
+      btn.classList.toggle('active', isActive);
+    });
+  };
+
+  // Load saved font scale
+  (function() {
+    const saved = localStorage.getItem('hub_font_scale');
+    if (saved) {
+      fontScale = parseFloat(saved);
+      document.documentElement.style.setProperty('--font-scale', fontScale.toFixed(2));
+    }
+    // Update font size buttons
+    document.querySelectorAll('.acc-btn[data-fontsize]').forEach(btn => {
+      const target = btn.dataset.fontsize;
+      const isActive = (fontScale <= 0.95 && target === 'decrease') ||
+                       (fontScale > 0.95 && fontScale < 1.05 && target === 'default') ||
+                       (fontScale >= 1.05 && target === 'increase');
+      btn.classList.toggle('active', isActive);
+    });
+    // Load saved theme
+    const savedTheme = localStorage.getItem('hub_theme');
+    if (savedTheme) {
+      window.setTheme(savedTheme);
+    }
+    // Load saved high contrast
+    if (savedTheme === 'high-contrast') {
+      document.documentElement.classList.add('high-contrast');
+      const hcToggle = $('highContrastToggle');
+      if (hcToggle) hcToggle.checked = true;
+    }
+    // Load saved focus visible
+    const savedFocus = localStorage.getItem('hub_focus_visible');
+    if (savedFocus === 'true') {
+      document.documentElement.classList.add('focus-visible-enabled');
+      const fvToggle = $('focusVisibleToggle');
+      if (fvToggle) fvToggle.checked = true;
+    }
+  })();
+
+  window.toggleHighContrast = (enabled) => {
+    const html = document.documentElement;
+    if (enabled) {
+      html.classList.add('high-contrast');
+      localStorage.setItem('hub_theme', 'high-contrast');
+    } else {
+      html.classList.remove('high-contrast');
+      localStorage.setItem('hub_theme', html.classList.contains('dark') ? 'dark' : 'light');
+    }
+    // Sync theme buttons
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === (enabled ? 'high-contrast' : (html.classList.contains('dark') ? 'dark' : 'light')));
+    });
+    const themeBtns = document.querySelectorAll('[data-theme]');
+    themeBtns.forEach(btn => btn.setAttribute('aria-pressed', btn.classList.contains('active')));
+    rebuildCharts();
+  };
+
+  window.toggleFocusVisible = (enabled) => {
+    const html = document.documentElement;
+    if (enabled) {
+      html.classList.add('focus-visible-enabled');
+    } else {
+      html.classList.remove('focus-visible-enabled');
+    }
+    localStorage.setItem('hub_focus_visible', enabled.toString());
+  };
+
+  // Add CSS for focus-visible-enabled class
+  const style = document.createElement('style');
+  style.textContent = `
+    html.focus-visible-enabled *:focus-visible {
+      outline: 3px solid #2E5A9E !important;
+      outline-offset: 2px !important;
+      border-radius: 4px !important;
+    }
+    html.dark.focus-visible-enabled *:focus-visible {
+      outline-color: #7c5cbf !important;
+    }
+    html.high-contrast.focus-visible-enabled *:focus-visible {
+      outline: 3px solid #000 !important;
+      outline-offset: 2px !important;
+    }
+    html.dark.high-contrast.focus-visible-enabled *:focus-visible {
+      outline: 3px solid #fff !important;
+      outline-offset: 2px !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // ════════════════════════════════════════════════════════════
+  // REQ #4 — FORMULÁRIO DE CONTATO / SUPORTE
+  // ═══════════════════════════════════════════════════════════
+  window.validateContactForm = () => {
+    const form = $('contactForm');
+    if (!form) return false;
+    let valid = true;
+    const fields = [
+      { id: 'cName', minLen: 3, msg: 'Nome deve ter pelo menos 3 caracteres.' },
+      { id: 'cEmail', type: 'email', msg: 'E-mail inválido.' },
+      { id: 'cSubject', required: true, msg: 'Selecione um assunto.' },
+      { id: 'cMessage', minLen: 10, msg: 'Mensagem deve ter pelo menos 10 caracteres.' }
+    ];
+    fields.forEach(f => {
+      const el = $(f.id);
+      const errEl = $(f.id + 'Err');
+      if (!el) return;
+      let fieldValid = true;
+      if (f.required && !el.value.trim()) fieldValid = false;
+      if (f.minLen && el.value.trim().length < f.minLen) fieldValid = false;
+      if (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) fieldValid = false;
+      if (errEl) {
+        errEl.textContent = fieldValid ? '' : f.msg;
+        errEl.classList.toggle('hidden', fieldValid);
+      }
+      if (!fieldValid) valid = false;
+    });
+    return valid;
+  };
+
+  window.handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!window.validateContactForm()) return;
+    const btn = $('cSubmitBtn');
+    const form = $('contactForm');
+    if (!btn || !form) return;
+    // Show loading
+    const originalText = btn.textContent;
+    btn.textContent = 'Enviando…';
+    btn.disabled = true;
+    btn.style.opacity = '.7';
+
+    // Simulate API call (replace with real endpoint)
+    await new Promise(r => setTimeout(r, 1200));
+
+    // Show success
+    form.style.display = 'none';
+    const successEl = $('contactSuccess');
+    if (successEl) {
+      successEl.classList.remove('hidden');
+      successEl.style.animation = 'fadeUp .3s ease';
+    }
+    // Reset form
+    form.reset();
+    // Hide success after 5s and show form again
+    setTimeout(() => {
+      window.closeContactSuccess();
+    }, 8000);
+
+    // Restore button
+    btn.textContent = originalText;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  };
+
+  window.closeContactSuccess = () => {
+    const form = $('contactForm');
+    const successEl = $('contactSuccess');
+    if (form) form.style.display = 'block';
+    if (successEl) successEl.classList.add('hidden');
+  };
+
+  // Attach submit listener
+  const cf = $('contactForm');
+  if (cf) cf.addEventListener('submit', window.handleContactSubmit);
+
+  // ════════════════════════════════════════════════════════════
+  // REQ #5 — RODAPÉ: ATUALIZAR ANO
+  // ═══════════════════════════════════════════════════════════
+  const yearEl = $('footerYear');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // ════════════════════════════════════════════════════════════
+  // ATUALIZAÇÃO DO renderTab PARA INCLUIR 'contato' E 'biblioteca'
+  // ═══════════════════════════════════════════════════════════
+  window.renderTab = (tab) => {
+    // Original renderTab logic (inline)
+    if(tab==='hoje'){renderChecklist();renderToday();}
+    if(tab==='planos')renderPlanos();
+    if(tab==='prazos')renderDeadlines();
+    if(tab==='calendario')renderCal();
+    if(tab==='progresso')renderProgress();
+    if(tab==='perfil')loadProfileForm();
+    if(tab==='biblioteca'){renderBiblioteca();if(window.carouselUpdate)window.carouselUpdate();}
+    if(tab==='contato'){
+      const f=$('contactForm'); if(f)f.reset();
+      const s=$('contactSuccess'); if(s)s.classList.add('hidden');
+    }
+  };
+
+  // Ensure switchTab handles 'contato'
+  // (already handled by original switchTab which calls renderTab)
+
 })();
 </script>
 

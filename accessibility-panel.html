@@ -1,0 +1,38 @@
+<!-- Accessibility Panel Component -->
+<div id="accessibilityPanel" class="fixed top-0 right-0 z-[1000] w-80 max-h-screen border-l border-white/10 shadow-2xl transform transition-transform rtl:left-auto rtl:translate-x-full" style="background:rgba(15,23,42,.85);backdrop-filter:blur(20px);" aria-label="Painel de acessibilidade" role="dialog" aria-modal="true" aria-labelledby="accTitle" tabindex="0">
+  <div class="p-6 pt-2">
+    <h2 id="accTitle" class="text-xl font-bold text-slate-800 dark:text-white mb-4">Acessibilidade</h2>
+    <button onclick="window.closeAccessibilityPanel()" class="absolute right-2 top-2 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/40 hover:text-white/70 transition" aria-label="Fechar painel">✕</button>
+
+    <!-- Theme & Contrast -->
+    <div class="space-y-4 mb-6">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Tema</h3>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="window.setTheme('light')" class="rounded-md py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors ${
+          !document.documentElement.classList.contains('dark') ? 'bg-ocean-700 text-white' : 'bg-white dark:bg-slate-900'
+        }">Claro</button>
+        <button onclick="window.setTheme('dark')" class="rounded-md py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors ${
+          document.documentElement.classList.contains('dark') ? 'bg-ocean-700 text-white' : 'bg-white dark:bg-slate-900'
+        }">Escuro</button>
+        <button onclick="window.setTheme('high-contrast')" class="rounded-md py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors" style="background:var(--contrast-bg, #000000); color:var(--contrast-fg, #ffffff);">Alto Contraste</button>
+      </div>
+
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Tamanho da Fonte</h3>
+      <div class="flex gap-2">
+        <button onclick="window.setFontSize('smaller')" class="rounded-md py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700">A-</button>
+        <button onclick="window.setFontSize('default')" class="rounded-md py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-ocean-700 text-white">A</button>
+        <button onclick="window.setFontSize('larger')" class="rounded-md py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700">A+</button>
+      </div>
+    </div>
+
+    <!-- Focus Visible -->
+    <div class="pt-4 border-t border-white/10">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Navegação</h3>
+      <div class="flex items-center gap-3">
+        <input type="checkbox" id="focusVisible" checked class="w-4 h-4 rounded-md border-slate-400 dark:border-slate-500 cursor-pointer">
+        <label for="focusVisible" class="text-sm text-slate-500 dark:text-slate-400">Mostrar contorno de foco teclado</label>
+      </div>
+      <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Quando marcado, links e campos receberão um contorno visível ao navegação por teclado.</p>
+    </div>
+  </div>
+</div>
