@@ -2642,6 +2642,8 @@ window.requestPasswordReset = async () => {
 
   try {
     await sendPasswordResetEmail(auth, email);
+    // Cooldown só começa após o envio ter dado certo — nunca em erro de rede/configuração.
+    localStorage.setItem(pwdResetCooldownKey, Date.now().toString());
     showPasswordResetFeedback('success', 'e-mail enviado, confira sua caixa de entrada');
   } catch (ex) {
     const messages = {
@@ -2652,7 +2654,6 @@ window.requestPasswordReset = async () => {
     showPasswordResetFeedback('error', messages[ex.code] || 'Não foi possível enviar o e-mail. Tente novamente mais tarde.');
   } finally {
     pwdResetSending = false;
-    localStorage.setItem(pwdResetCooldownKey, Date.now().toString());
     btn.disabled = false;
     emailEl.disabled = false;
     btn.textContent = 'Enviar E-mail de Recuperação';
