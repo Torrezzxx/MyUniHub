@@ -2662,6 +2662,16 @@ window.requestPasswordReset = async () => {
   }
 };
 
+// ── Cooldown de recuperação de senha ───────────────────────────
+// Persiste o timestamp da última solicitação em localStorage para evitar
+// reenvios desnecessários enquanto o Firebase rateia o endpoint.
+function isPasswordResetCooldownActive() {
+  const saved = localStorage.getItem(pwdResetCooldownKey);
+  if (!saved) return false;
+  const elapsed = Date.now() - Number(saved);
+  return elapsed < 45 * 1000;
+}
+
 // ── AUTH OBSERVER ─────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { show('authScreen'); return; }
